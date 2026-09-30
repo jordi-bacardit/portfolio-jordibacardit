@@ -75,7 +75,8 @@ Confirmed facts:
 - Lost On The Gates: World War II tank survival game, Unity and C#. Confirmed: tank gameplay, enemy AI with NavMeshAgent, turret systems, HUD, kill counter, prefabs. Unknown: my role, solo or team, context, dates, links, media.
 - Unreal Engine gameplay prototype: an actor/trigger system; reaching the trigger restarts the level. Nothing else confirmed.
 - TFG (Final Degree Project): AI and video games, not built yet. Two candidate directions: "ArtScan AI" (not defined; don't describe it) and a small Unreal Engine RPG with AI-driven NPCs. Always labelled Upcoming / In development / TFG. No screenshots, features or results.
-- Still TODO: graduation year, email, LinkedIn URL, GitHub URL, CV file, domain.
+- Domain: https://jordibacardit.com (hosted on Netlify, deployed from GitHub `main`).
+- Still TODO: graduation year, email, LinkedIn URL, GitHub URL, CV file.
 
 <!-- Cuando confirmes datos (rol, fechas, equipo, herramientas de producción...), añádelos arriba o en los archivos de datos. -->
 
@@ -104,7 +105,9 @@ Index: one featured project shown large, the rest secondary, never a grid of ide
 
 ## Game Library
 
-Shows how I think about games as a medium. Entry fields: title, platforms, genre, status (playing / played / favourite / formative), my note (why it matters to me), optional image (my own screenshots preferred). The layout can be more experimental than Work but uses the same tokens, type and components. Propose options before building it.
+Shows how I think about games as a medium. Entry fields: title, platforms, genre, status (playing / played / favourite / formative), my note (why it matters to me), optional image (my own screenshots preferred). The layout can be more experimental than Work but uses the same tokens, type and components. Propose options before changing it.
+
+- Layout (chosen 2026-09-30): one library of cards sorted by title, with a search by title. Each card: 16:9 screenshot with a status badge, title, genre, platforms, and my note clipped to four lines with "Read more". No status filters or groups.
 
 - Entries live in `src/content/games/` (one Markdown file each) and I add, edit and delete them through Sveltia CMS at `/administrador` (page `src/pages/administrador.astro`, config `public/administrador/config.yml`). It commits to GitHub, so only accounts with write access to the repo can save. The site stays static.
 - The CMS uploads images to `src/assets/projects/` and `src/assets/games/` and writes `/src/assets/...` paths, which `image()` resolves. Keep the CMS config and the collection schemas in `src/content.config.ts` in sync.
@@ -158,7 +161,7 @@ Near-black with an acid-green accent is currently one of the most common looks a
 
 ## SEO and performance
 
-- Per page: unique `<title>` (e.g. "Work — Jordi Bacardit"), meta description, Open Graph and Twitter tags, canonical URL. Site-wide: favicon from the logo, default OG image 1200×630 (TODO), sitemap, robots.txt. `site` in the Astro config: TODO (domain).
+- Per page: unique `<title>` (e.g. "Work — Jordi Bacardit"), meta description, Open Graph and Twitter tags, canonical URL. Site-wide: favicon from the logo, default OG image 1200×630 (TODO), sitemap, robots.txt. `site` in the Astro config: `https://jordibacardit.com`.
 - Target Lighthouse 90+ on mobile in every category. No layout shift from images or fonts.
 
 ## When rules pull in different directions

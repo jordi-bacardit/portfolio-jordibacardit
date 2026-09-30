@@ -3,8 +3,8 @@ import { defineConfig, fontProviders } from 'astro/config';
 
 // https://astro.build/config
 export default defineConfig({
-  // TODO(content): production domain, e.g. site: 'https://example.com'.
-  // Canonical and Open Graph URLs are only emitted once this is set.
+  // Production domain: canonical and Open Graph URLs are built from it.
+  site: 'https://jordibacardit.com',
   fonts: [
     {
       provider: fontProviders.google(),

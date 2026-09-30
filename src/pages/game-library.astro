@@ -4,10 +4,11 @@ import Container from '../components/Container.astro';
 import Placeholder from '../components/Placeholder.astro';
 import SplitText from '../components/SplitText.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { getGameGroups } from '../lib/games';
+import { getGames, statusLabels } from '../lib/games';
 import { paragraphs } from '../lib/text';
 
-const groups = await getGameGroups();
+const games = await getGames();
+const countLabel = (count: number) => `${count} ${count === 1 ? 'game' : 'games'}`;
 ---
 
 <BaseLayout
@@ -20,66 +21,150 @@ const groups = await getGameGroups();
   </Container>
 
   {
-    groups.length === 0 ? (
+    games.length === 0 ? (
       <Container>
         <p>
           <Placeholder label="add games" />
         </p>
       </Container>
     ) : (
-      groups.map((group) => (
-        <Container as="section" class="group" aria-labelledby={`status-${group.status}`}>
-          <h2 id={`status-${group.status}`} class="group-title">
-            {group.label}.
-          </h2>
-          <ul role="list" class="games">
-            {group.games.map((game) => {
-              const { image } = game.data;
-              return (
-                <li class="game">
-                  <div class:list={['cover', { 'has-image': image }]}>
-                    {image ? (
-                      <Image
-                        src={image}
-                        alt={game.data.imageAlt || `Screenshot of ${game.data.title}`}
-                        widths={[360, 720]}
-                        sizes="(min-width: 64em) 16rem, 50vw"
-                      />
-                    ) : (
-                      <span class="cover-title" aria-hidden="true">
-                        {game.data.title}
-                      </span>
-                    )}
-                  </div>
-                  <h3>{game.data.title}</h3>
+      <Container class="library">
+        <div class="toolbar">
+          <div class="search" role="search" data-search hidden>
+            <label for="game-search">Search</label>
+            <input
+              id="game-search"
+              type="search"
+              placeholder="Game title"
+              autocomplete="off"
+              spellcheck="false"
+            />
+          </div>
+          <p class="count" aria-live="polite" data-search-status>
+            {countLabel(games.length)}
+          </p>
+        </div>
+
+        <ul role="list" class="grid">
+          {games.map((game) => {
+            const { title, platforms, genre, status, note, image, imageAlt } = game.data;
+            return (
+              <li class="card" data-game-title={title} data-spotlight>
+                <div class="media">
+                  {image ? (
+                    <Image
+                      src={image}
+                      alt={imageAlt || `Screenshot of ${title}`}
+                      widths={[480, 800, 1200]}
+                      sizes="(min-width: 80em) 28rem, (min-width: 40em) 50vw, 100vw"
+                      class="shot"
+                    />
+                  ) : (
+                    <span class="cover-title" aria-hidden="true">
+                      {title}
+                    </span>
+                  )}
+                  <span class="status">
+                    <span class="dot" aria-hidden="true"></span>
+                    {statusLabels[status]}
+                  </span>
+                </div>
+                <div class="body">
+                  <h2 class="title">{title}</h2>
                   <dl class="facts">
                     <div>
                       <dt>Genre</dt>
-                      <dd>{game.data.genre}</dd>
+                      <dd>{genre}</dd>
                     </div>
                     <div>
                       <dt>Platforms</dt>
-                      <dd>{game.data.platforms.join(', ')}</dd>
+                      <dd>{platforms.join(', ')}</dd>
                     </div>
                   </dl>
-                  {paragraphs(game.data.note).map((paragraph) => (
-                    <p class="note">{paragraph}</p>
-                  ))}
-                </li>
-              );
-            })}
-          </ul>
-        </Container>
-      ))
+                  <div class="note" id={`note-${game.id}`} data-note>
+                    {paragraphs(note).map((paragraph) => (
+                      <p>{paragraph}</p>
+                    ))}
+                  </div>
+                  <button
+                    class="more"
+                    type="button"
+                    aria-expanded="false"
+                    aria-controls={`note-${game.id}`}
+                    data-more
+                    hidden
+                  >
+                    <span data-more-label>Read more</span>
+                    <span data-less-label hidden>
+                      Show less
+                    </span>
+                    <span class="visually-hidden"> about {title}</span>
+                  </button>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+
+        <p class="empty" data-search-empty hidden>
+          No game matches that search.
+        </p>
+      </Container>
     )
   }
 </BaseLayout>
+
+<script>
+  // Title search. The box needs JS, so it stays hidden until this runs; then it filters as you type.
+  const search = document.querySelector<HTMLElement>('[data-search]');
+  const input = search?.querySelector('input');
+  const status = document.querySelector<HTMLElement>('[data-search-status]');
+  const empty = document.querySelector<HTMLElement>('[data-search-empty]');
+  const cards = [...document.querySelectorAll<HTMLElement>('[data-game-title]')];
+  const normalize = (text: string) =>
+    text.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  const countLabel = (count: number) => `${count} ${count === 1 ? 'game' : 'games'}`;
+
+  if (search && input && status) {
+    search.hidden = false;
+    input.addEventListener('input', () => {
+      const query = normalize(input.value.trim());
+      let shown = 0;
+      cards.forEach((card) => {
+        const match = !query || normalize(card.dataset.gameTitle ?? '').includes(query);
+        card.hidden = !match;
+        if (match) shown += 1;
+      });
+      status.textContent = query ? `${shown} of ${countLabel(cards.length)}` : countLabel(cards.length);
+      if (empty) empty.hidden = shown > 0;
+    });
+  }
+
+  // Long notes are clipped to a few lines with a "Read more" toggle (full text without JS).
+  document.querySelectorAll<HTMLElement>('[data-note]').forEach((note) => {
+    const button = note.parentElement?.querySelector<HTMLButtonElement>('[data-more]');
+    if (!button || note.scrollHeight <= note.clientHeight + 1) {
+      note.classList.add('open');
+      return;
+    }
+    const moreLabel = button.querySelector<HTMLElement>('[data-more-label]');
+    const lessLabel = button.querySelector<HTMLElement>('[data-less-label]');
+    button.hidden = false;
+    button.addEventListener('click', () => {
+      const open = button.getAttribute('aria-expanded') !== 'true';
+      button.setAttribute('aria-expanded', String(open));
+      note.classList.toggle('open', open);
+      if (moreLabel) moreLabel.hidden = open;
+      if (lessLabel) lessLabel.hidden = !open;
+    });
+  });
+</script>
 
 <style>
   .intro {
     display: grid;
     gap: var(--space-l);
-    padding-block: var(--space-2xl);
+    padding-block: var(--space-2xl) var(--space-xl);
   }
 
   .lead {
@@ -87,63 +172,175 @@ const groups = await getGameGroups();
     font-size: var(--text-lg);
   }
 
-  .group {
+  .library {
     display: grid;
     gap: var(--space-xl);
-    padding-block: var(--space-xl);
   }
 
-  .group-title {
-    font-size: var(--text-2xl);
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-m) var(--space-xl);
+    padding-bottom: var(--space-m);
+    border-bottom: var(--border-thin) solid var(--color-line);
+  }
+
+  .search {
+    display: grid;
+    flex: 1 1 18rem;
+    gap: var(--space-xs);
+    max-width: 32rem;
+  }
+
+  .search[hidden] {
+    display: none;
+  }
+
+  .search label,
+  .count,
+  .status {
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+  }
+
+  .search label,
+  .count {
     color: var(--color-text-muted);
   }
 
-  .games {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
-    gap: var(--space-2xl) var(--space-l);
+  .search input {
+    min-height: var(--tap-min);
+    padding: var(--space-xs) var(--space-s);
+    border: var(--border-thin) solid var(--color-text-muted);
+    background: var(--color-surface);
+    font-size: var(--text-lg);
+    transition: border-color var(--duration-fast) var(--ease-out);
   }
 
-  .game {
-    display: grid;
-    gap: var(--space-s);
-    align-content: start;
+  .search input:hover,
+  .search input:focus-visible {
+    border-color: var(--color-accent);
   }
 
-  .cover {
+  .search input::placeholder {
+    color: var(--color-text-muted);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+    gap: var(--space-l);
+  }
+
+  .card {
+    position: relative;
+    isolation: isolate;
     display: flex;
-    align-items: flex-end;
-    aspect-ratio: 2 / 3;
-    margin-bottom: var(--space-xs);
+    flex-direction: column;
     overflow: hidden;
     border: var(--border-thin) solid var(--color-line);
     background: var(--color-surface);
     transition: border-color var(--duration-base) var(--ease-out);
   }
 
-  .game:hover .cover {
+  .card[hidden] {
+    display: none;
+  }
+
+  .card:hover {
     border-color: var(--color-accent);
   }
 
-  .cover :global(img) {
+  /* Light that follows the pointer; Effects.astro sets --spot-x/--spot-y. */
+  .card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: radial-gradient(
+      22rem circle at var(--spot-x, 50%) var(--spot-y, 50%),
+      var(--color-accent-glow),
+      transparent 70%
+    );
+    opacity: 0;
+    transition: opacity var(--duration-base) var(--ease-out);
+    pointer-events: none;
+  }
+
+  .card:hover::before {
+    opacity: 1;
+  }
+
+  .media {
+    position: relative;
+    display: grid;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-bottom: var(--border-thin) solid var(--color-line);
+    background: var(--color-bg);
+  }
+
+  .media > * {
+    grid-area: 1 / 1;
+  }
+
+  .shot {
     width: 100%;
     height: 100%;
     object-fit: cover;
     transition: transform var(--duration-slow) var(--ease-out);
   }
 
-  .game:hover .cover :global(img) {
+  .card:hover .shot {
     transform: scale(1.03);
   }
 
   .cover-title {
+    align-self: end;
     padding: var(--space-m);
+    color: var(--color-text-muted);
     font-family: var(--font-display);
     font-size: var(--text-xl);
     font-weight: 600;
     letter-spacing: -0.03em;
     line-height: 0.95;
     text-transform: uppercase;
+  }
+
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    align-self: start;
+    justify-self: start;
+    margin: var(--space-s);
+    padding: var(--space-2xs) var(--space-s);
+    background: var(--color-scrim);
+    color: var(--color-text);
+  }
+
+  .dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    background: var(--color-accent);
+  }
+
+  .body {
+    display: grid;
+    flex: 1;
+    gap: var(--space-m);
+    align-content: start;
+    padding: var(--space-l);
+  }
+
+  .title {
+    font-size: var(--text-xl);
+    line-height: 0.95;
+    letter-spacing: -0.03em;
   }
 
   .facts {
@@ -153,6 +350,43 @@ const groups = await getGameGroups();
   }
 
   .note {
+    display: grid;
+    gap: var(--space-s);
+    color: var(--color-text-muted);
+  }
+
+  /* Clip long notes to four lines with a fade, only when JS can offer "Read more". */
+  :global(.js) .note:not(.open) {
+    max-height: calc(var(--leading-body) * 1em * 4);
+    overflow: hidden;
+    mask-image: linear-gradient(to bottom, black 55%, transparent);
+  }
+
+  .more {
+    justify-self: start;
+    min-height: var(--tap-min);
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--color-text);
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-label);
+    text-decoration: underline;
+    text-decoration-color: var(--color-accent);
+    text-underline-offset: 0.3em;
+    text-transform: uppercase;
+  }
+
+  .more[hidden] {
+    display: none;
+  }
+
+  .more:hover {
+    color: var(--color-accent);
+  }
+
+  .empty {
     color: var(--color-text-muted);
   }
 </style>
