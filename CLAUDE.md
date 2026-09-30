@@ -164,7 +164,7 @@ Near-black with an acid-green accent is currently one of the most common looks a
 
 ## SEO and performance
 
-- Per page: unique `<title>` (e.g. "Work — Jordi Bacardit"), meta description, Open Graph and Twitter tags, canonical URL. Site-wide: favicon from the logo, default OG image 1200×630 (TODO), sitemap, robots.txt. `site` in the Astro config: `https://jordibacardit.com`.
+- Per page: unique `<title>` (e.g. "Work — Jordi Bacardit"), meta description, Open Graph and Twitter tags, canonical URL. Site-wide: favicon from the logo, default OG image 1200×630 (`public/og.jpg`: logo, name, role, portrait; pages can pass their own `image`), sitemap, robots.txt. `site` in the Astro config: `https://jordibacardit.com`.
 - Target Lighthouse 90+ on mobile in every category. No layout shift from images or fonts.
 
 ## When rules pull in different directions
