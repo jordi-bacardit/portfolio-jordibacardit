@@ -222,6 +222,11 @@ function current(href: string) {
     @media (prefers-reduced-motion: no-preference) {
       .progress {
         animation: scroll-progress linear both;
+      }
+
+      /* Kept in its own rule on purpose: the CSS minifier would otherwise fold the timeline into
+         the animation shorthand, which browsers reject (the shorthand can't carry a timeline). */
+      .site-header .progress {
         animation-timeline: scroll(root);
       }
     }
