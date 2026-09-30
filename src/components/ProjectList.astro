@@ -1,0 +1,47 @@
+---
+// The Work composition: the featured project large, the rest stacked beside it.
+import ProjectCard from './ProjectCard.astro';
+import { splitFeatured, type Project } from '../lib/projects';
+
+interface Props {
+  projects: Project[];
+  headingLevel?: 2 | 3;
+  eager?: boolean;
+}
+
+const { projects, headingLevel = 2, eager = false } = Astro.props;
+const { featured, rest } = splitFeatured(projects);
+---
+
+{
+  featured && (
+    <div class="grid">
+      <ProjectCard project={featured} size="large" headingLevel={headingLevel} eager={eager} />
+      {rest.length > 0 && (
+        <div class="side">
+          {rest.map((project) => (
+            <ProjectCard project={project} headingLevel={headingLevel} />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+<style>
+  .grid,
+  .side {
+    display: grid;
+    gap: var(--space-m);
+  }
+
+  @media (min-width: 64em) {
+    .grid {
+      grid-template-columns: 1.25fr 0.75fr;
+    }
+
+    .side {
+      grid-auto-rows: 1fr;
+    }
+  }
+</style>

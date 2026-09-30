@@ -1,0 +1,250 @@
+---
+import { getImage, Image, Picture } from 'astro:assets';
+import { render } from 'astro:content';
+import Button from '../../components/Button.astro';
+import Container from '../../components/Container.astro';
+import ProjectMeta from '../../components/ProjectMeta.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getProjects, type Project } from '../../lib/projects';
+
+export async function getStaticPaths() {
+  const projects = await getProjects();
+  return projects.map((project, index) => ({
+    params: { slug: project.id },
+    props: { project, prev: projects[index - 1], next: projects[index + 1] },
+  }));
+}
+
+interface Props {
+  project: Project;
+  prev?: Project;
+  next?: Project;
+}
+
+const { project, prev, next } = Astro.props;
+const { title, summary, cover, coverAlt, gallery, links } = project.data;
+const { Content } = await render(project);
+
+const ogImage = cover ? (await getImage({ src: cover, width: 1200, format: 'jpg' })).src : undefined;
+
+const actions = [
+  links?.build ? { label: 'Play the build', href: links.build } : null,
+  links?.video ? { label: 'Watch the video', href: links.video } : null,
+  links?.repo ? { label: 'View the source code', href: links.repo } : null,
+].filter((action) => action !== null);
+---
+
+<BaseLayout title={title} description={summary} image={ogImage}>
+  <article>
+    <Container as="header" class="hero">
+      <h1>{title}</h1>
+      <p class="pitch">{summary}</p>
+    </Container>
+
+    {
+      cover && (
+        <Container class="cover">
+          <Picture
+            src={cover}
+            alt={coverAlt ?? ''}
+            formats={['avif', 'webp']}
+            widths={[640, 960, 1280, 1920, 2560]}
+            sizes="(min-width: 88rem) 88rem, 100vw"
+            loading="eager"
+            fetchpriority="high"
+          />
+        </Container>
+      )
+    }
+
+    <Container class="body">
+      <aside class="details" aria-label="Project details">
+        <ProjectMeta project={project.data} />
+        {
+          actions.length > 0 && (
+            <div class="actions">
+              {actions.map((action, index) => (
+                <Button href={action.href} variant={index === 0 ? 'primary' : 'secondary'}>
+                  {action.label}
+                </Button>
+              ))}
+            </div>
+          )
+        }
+      </aside>
+      <div class="prose">
+        <Content />
+      </div>
+    </Container>
+
+    {
+      gallery && gallery.length > 0 && (
+        <Container as="section" class="gallery" aria-labelledby="gallery-title">
+          <h2 id="gallery-title">Gallery</h2>
+          <ul role="list">
+            {gallery.map((item) => (
+              <li>
+                <Image
+                  src={item.image}
+                  alt={item.alt}
+                  widths={[640, 960, 1280]}
+                  sizes="(min-width: 48em) 50vw, 100vw"
+                />
+              </li>
+            ))}
+          </ul>
+        </Container>
+      )
+    }
+  </article>
+
+  {
+    (prev || next) && (
+      <Container as="nav" class="pager" aria-label="More projects">
+        {prev && (
+          <a class="prev" href={`/work/${prev.id}`} rel="prev">
+            <span class="direction">Previous project</span>
+            <span class="pager-title">{prev.data.title}</span>
+          </a>
+        )}
+        {next && (
+          <a class="next" href={`/work/${next.id}`} rel="next">
+            <span class="direction">Next project</span>
+            <span class="pager-title">{next.data.title}</span>
+          </a>
+        )}
+      </Container>
+    )
+  }
+</BaseLayout>
+
+<style>
+  .hero {
+    display: grid;
+    gap: var(--space-l);
+    padding-block: var(--space-2xl);
+  }
+
+  .pitch {
+    font-size: var(--text-lg);
+  }
+
+  .cover :global(img) {
+    width: 100%;
+    max-height: 80svh;
+    object-fit: cover;
+  }
+
+  .body {
+    display: grid;
+    gap: var(--space-2xl);
+    padding-block: var(--space-2xl);
+  }
+
+  .details {
+    display: grid;
+    gap: var(--space-xl);
+    align-content: start;
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-s);
+  }
+
+  .prose {
+    display: grid;
+    gap: var(--space-m);
+    align-content: start;
+  }
+
+  .prose :global(h2) {
+    margin-top: var(--space-l);
+    font-size: var(--text-xl);
+  }
+
+  .prose :global(h2:first-child) {
+    margin-top: 0;
+  }
+
+  .prose :global(ul) {
+    display: grid;
+    gap: var(--space-xs);
+    max-width: var(--measure);
+    padding-left: 1.25em;
+  }
+
+  .prose :global(li::marker) {
+    color: var(--color-text-muted);
+  }
+
+  .gallery {
+    display: grid;
+    gap: var(--space-xl);
+    padding-block: var(--space-2xl);
+  }
+
+  .gallery ul {
+    display: grid;
+    gap: var(--space-l);
+  }
+
+  .pager {
+    display: grid;
+    gap: var(--space-m);
+    padding-top: var(--space-2xl);
+  }
+
+  .pager a {
+    display: grid;
+    gap: var(--space-2xs);
+    padding-block: var(--space-l);
+    border-top: var(--border-thin) solid var(--color-line);
+    text-decoration: none;
+  }
+
+  .direction {
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+  }
+
+  .pager-title {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    font-weight: 800;
+    line-height: 1;
+    text-transform: uppercase;
+    transition: color var(--duration-fast) var(--ease-out);
+  }
+
+  .pager a:hover .pager-title {
+    color: var(--color-accent);
+  }
+
+  @media (min-width: 48em) {
+    .gallery ul {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .pager {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .next {
+      grid-column: 2;
+      text-align: right;
+    }
+  }
+
+  @media (min-width: 64em) {
+    .body {
+      grid-template-columns: minmax(14rem, 1fr) 3fr;
+    }
+
+    .details {
+      position: sticky;
+      top: var(--space-xl);
+    }
+  }
+</style>

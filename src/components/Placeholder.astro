@@ -1,0 +1,25 @@
+---
+// Visible marker for required content that doesn't exist yet. It must never pass for real copy.
+interface Props {
+  label: string;
+}
+
+const { label } = Astro.props;
+---
+
+<span class="placeholder">[TODO: {label}]</span>
+
+<style>
+  .placeholder {
+    display: inline-block;
+    padding: 0 var(--space-2xs);
+    border: var(--border-thin) dashed var(--color-text-muted);
+    color: var(--color-text-muted);
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    font-weight: 400;
+    letter-spacing: 0;
+    line-height: 1.6;
+    text-transform: none;
+  }
+</style>

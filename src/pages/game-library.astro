@@ -1,0 +1,149 @@
+---
+import { Image } from 'astro:assets';
+import Container from '../components/Container.astro';
+import Placeholder from '../components/Placeholder.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getGameGroups, getGameImage } from '../lib/games';
+
+const groups = await getGameGroups();
+---
+
+<BaseLayout
+  title="Game Library"
+  description="A personal archive of the games I play and the games that shaped me."
+>
+  <Container class="intro">
+    <h1>Game Library</h1>
+    <p class="lead">A personal archive of the games I play and the games that shaped me.</p>
+  </Container>
+
+  {
+    groups.length === 0 ? (
+      <Container>
+        <p>
+          <Placeholder label="add games" />
+        </p>
+      </Container>
+    ) : (
+      groups.map((group) => (
+        <Container as="section" class="group" aria-labelledby={`status-${group.status}`}>
+          <h2 id={`status-${group.status}`} class="group-title">
+            {group.label}
+          </h2>
+          <ul role="list" class="games">
+            {group.games.map((game) => {
+              const image = getGameImage(game.data.image);
+              return (
+                <li class="game">
+                  {image && (
+                    <Image
+                      src={image}
+                      alt={game.data.imageAlt || `Screenshot of ${game.data.title}`}
+                      widths={[480, 960]}
+                      sizes="(min-width: 64em) 20rem, 100vw"
+                      class="shot"
+                    />
+                  )}
+                  <div class="text">
+                    <h3>{game.data.title}</h3>
+                    <dl class="facts">
+                      <div>
+                        <dt>Platforms</dt>
+                        <dd>{game.data.platforms.join(', ')}</dd>
+                      </div>
+                      <div>
+                        <dt>Genre</dt>
+                        <dd>{game.data.genre}</dd>
+                      </div>
+                    </dl>
+                    {game.data.note.split(/\n\s*\n/).map((paragraph) => (
+                      <p class="note">{paragraph}</p>
+                    ))}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </Container>
+      ))
+    )
+  }
+</BaseLayout>
+
+<style>
+  .intro {
+    display: grid;
+    gap: var(--space-m);
+    padding-block: var(--space-2xl);
+  }
+
+  .lead {
+    color: var(--color-text-muted);
+    font-size: var(--text-lg);
+  }
+
+  .group {
+    display: grid;
+    gap: var(--space-xl);
+    padding-block: var(--space-2xl);
+  }
+
+  .group-title {
+    color: var(--color-text-muted);
+  }
+
+  .games {
+    display: grid;
+  }
+
+  .game {
+    display: grid;
+    gap: var(--space-l);
+    padding-block: var(--space-xl);
+    border-top: var(--border-thin) solid var(--color-line);
+  }
+
+  .shot {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+  }
+
+  .text {
+    display: grid;
+    gap: var(--space-m);
+    align-content: start;
+  }
+
+  .facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-m) var(--space-xl);
+  }
+
+  dt {
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+  }
+
+  dd {
+    margin: 0;
+  }
+
+  /* Status names act as large sticky labels beside their games on wide screens. */
+  @media (min-width: 64em) {
+    .group {
+      grid-template-columns: 1fr 2fr;
+      align-items: start;
+    }
+
+    .group-title {
+      position: sticky;
+      top: var(--space-xl);
+    }
+
+    .game:has(.shot) {
+      grid-template-columns: 20rem 1fr;
+    }
+  }
+</style>

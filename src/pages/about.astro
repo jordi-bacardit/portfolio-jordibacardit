@@ -1,0 +1,155 @@
+---
+import { Image } from 'astro:assets';
+import portrait from '../assets/jordi-portrait.png';
+import Button from '../components/Button.astro';
+import Container from '../components/Container.astro';
+import Placeholder from '../components/Placeholder.astro';
+import { site, technologies } from '../data/site';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const { study } = site;
+---
+
+<BaseLayout
+  title="About"
+  description={`About ${site.name}: ${study.degree} student at ${study.school}, focused on game production with a technical game-development background.`}
+>
+  <Container class="intro">
+    <div class="copy">
+      <h1>Who I am.</h1>
+      <p class="lead">
+        I'm {site.name}, a {study.degree} student at {study.school}, {study.country}.
+      </p>
+    </div>
+    <Image
+      src={portrait}
+      alt={`Portrait of ${site.name}`}
+      widths={[480, 800, 1200]}
+      sizes="(min-width: 64em) 40vw, 100vw"
+      loading="eager"
+      class="portrait"
+    />
+  </Container>
+
+  <Container as="section" class="focus" aria-labelledby="focus-title">
+    <h2 id="focus-title">Focus.</h2>
+    <div class="text">
+      <p>
+        My focus is game production: project coordination, planning, production pipelines and team
+        coordination. It's backed by a technical game-development background: I've built projects in
+        Unity and Unreal Engine, and I've worked with C#, C++ and the other languages and tools
+        listed below.
+      </p>
+      <p>I'm looking for internships and junior roles in game production in the European games industry.</p>
+      {study.graduationYear && <p>Expected graduation: {study.graduationYear}.</p>}
+      <div class="cv">
+        {
+          site.cv ? (
+            <Button href={site.cv} variant="primary" download>
+              Download CV (PDF)
+            </Button>
+          ) : (
+            <Placeholder label="CV file" />
+          )
+        }
+      </div>
+    </div>
+  </Container>
+
+  <Container as="section" class="tech" aria-labelledby="tech-title">
+    <h2 id="tech-title">Tools.</h2>
+    <dl class="groups">
+      {
+        technologies.map((group) => (
+          <div class="group">
+            <dt>{group.category}</dt>
+            <dd>
+              <ul role="list">
+                {group.items.map((item) => (
+                  <li>{item}</li>
+                ))}
+              </ul>
+            </dd>
+          </div>
+        ))
+      }
+    </dl>
+  </Container>
+</BaseLayout>
+
+<style>
+  .intro {
+    display: grid;
+    gap: var(--space-xl);
+    padding-block: var(--space-2xl);
+  }
+
+  .copy {
+    display: grid;
+    gap: var(--space-l);
+    align-content: end;
+  }
+
+  .lead {
+    font-size: var(--text-lg);
+  }
+
+  .portrait {
+    width: 100%;
+    max-height: 80svh;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    object-position: 50% 30%;
+    border: var(--border-thin) solid var(--color-line);
+  }
+
+  .focus,
+  .tech {
+    display: grid;
+    gap: var(--space-xl);
+    padding-block: var(--space-2xl);
+  }
+
+  .text {
+    display: grid;
+    gap: var(--space-m);
+    font-size: var(--text-lg);
+  }
+
+  .cv {
+    margin-top: var(--space-m);
+  }
+
+  .groups {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    gap: var(--space-xl) var(--space-l);
+  }
+
+  .group {
+    display: grid;
+    gap: var(--space-s);
+    align-content: start;
+    padding-top: var(--space-m);
+    border-top: var(--border-thin) solid var(--color-line);
+  }
+
+  .group ul {
+    display: grid;
+    gap: var(--space-2xs);
+    font-size: var(--text-lg);
+  }
+
+  @media (min-width: 64em) {
+    .intro {
+      grid-template-columns: 7fr 5fr;
+      align-items: end;
+    }
+
+    .focus,
+    .tech {
+      grid-template-columns: 5fr 7fr;
+      align-items: start;
+    }
+  }
+</style>

@@ -1,0 +1,130 @@
+---
+// A project card: artwork fills it when a cover exists; otherwise the title carries it.
+// Carries the title plus up to three metadata values (and the pitch when large).
+import { Picture } from 'astro:assets';
+import ProjectMeta from './ProjectMeta.astro';
+import type { Project } from '../lib/projects';
+
+interface Props {
+  project: Project;
+  size?: 'large' | 'small';
+  headingLevel?: 2 | 3;
+  /** Load the cover eagerly when the card sits above the fold. */
+  eager?: boolean;
+}
+
+const { project, size = 'small', headingLevel = 2, eager = false } = Astro.props;
+const { title, summary, cover } = project.data;
+const Heading = `h${headingLevel}` as 'h2' | 'h3';
+---
+
+<article class:list={['card', size, { 'has-cover': cover }]}>
+  {
+    cover && (
+      <Picture
+        src={cover}
+        alt=""
+        class="art"
+        formats={['avif', 'webp']}
+        widths={size === 'large' ? [640, 960, 1280, 1920] : [480, 800, 1200]}
+        sizes={size === 'large' ? '(min-width: 64em) 60vw, 100vw' : '(min-width: 64em) 40vw, 100vw'}
+        loading={eager ? 'eager' : 'lazy'}
+        fetchpriority={eager ? 'high' : undefined}
+      />
+    )
+  }
+  <div class="info">
+    <Heading class="title">
+      <a href={`/work/${project.id}`}>{title}</a>
+    </Heading>
+    {size === 'large' && <p class="summary">{summary}</p>}
+    <ProjectMeta project={project.data} variant="compact" />
+  </div>
+</article>
+
+<style>
+  .card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    min-height: 22rem;
+    overflow: hidden;
+    border: var(--border-thin) solid var(--color-line);
+    background: var(--color-surface);
+    transition: border-color var(--duration-base) var(--ease-out);
+  }
+
+  .card:hover {
+    border-color: var(--color-accent);
+  }
+
+  .card :global(picture),
+  .card :global(.art) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .card :global(.art) {
+    object-fit: cover;
+    transition: transform var(--duration-slow) var(--ease-out);
+  }
+
+  .card:hover :global(.art) {
+    transform: scale(1.03);
+  }
+
+  .info {
+    position: relative;
+    display: grid;
+    gap: var(--space-m);
+    padding: var(--space-l);
+  }
+
+  /* Scrim behind text over artwork, for legibility. */
+  .has-cover .info {
+    background: linear-gradient(to top, var(--color-scrim) 60%, transparent);
+    padding-top: var(--space-3xl);
+  }
+
+  .title {
+    font-size: var(--text-2xl);
+  }
+
+  .large .title {
+    font-size: var(--text-3xl);
+  }
+
+  .title a {
+    text-decoration: none;
+  }
+
+  /* The title link covers the whole card so the full card is clickable. */
+  .title a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+
+  .summary {
+    font-size: var(--text-lg);
+  }
+
+  @media (min-width: 64em) {
+    .large {
+      min-height: 36rem;
+      height: 100%;
+    }
+
+    .small {
+      min-height: 17.5rem;
+    }
+
+    .info {
+      padding: var(--space-xl);
+    }
+  }
+</style>

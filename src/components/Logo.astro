@@ -1,0 +1,47 @@
+---
+// Renders the logo from src/assets/logo.(svg|png|webp) when the file exists.
+// Until then it shows a visible placeholder: the logo is never redrawn or approximated.
+import { Image } from 'astro:assets';
+
+interface Props {
+  size?: number;
+}
+
+const { size = 40 } = Astro.props;
+
+const files = import.meta.glob<{ default: ImageMetadata }>('/src/assets/logo.{svg,png,webp}', {
+  eager: true,
+});
+const logo = Object.values(files)[0]?.default;
+---
+
+{
+  logo ? (
+    <Image src={logo} alt="" height={size} class="logo" loading="eager" />
+  ) : (
+    <span class="logo placeholder" style={`--logo-size: ${size}px`} aria-hidden="true">
+      Logo
+    </span>
+  )
+}
+
+<style>
+  .logo {
+    flex-shrink: 0;
+    width: auto;
+  }
+
+  .placeholder {
+    display: grid;
+    place-items: center;
+    width: var(--logo-size);
+    height: var(--logo-size);
+    border: var(--border-thin) dashed var(--color-text-muted);
+    color: var(--color-text-muted);
+    font-family: var(--font-body);
+    font-size: 0.625rem;
+    line-height: 1;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+</style>

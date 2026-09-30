@@ -1,0 +1,57 @@
+---
+// Project metadata as a <dl>. "compact" shows at most three values (cards);
+// "full" shows every known value (detail page). Status is required and falls back to a placeholder.
+import Placeholder from './Placeholder.astro';
+import { statusLabels, typeLabels, type Project } from '../lib/projects';
+
+interface Props {
+  project: Project['data'];
+  variant?: 'compact' | 'full';
+}
+
+const { project, variant = 'full' } = Astro.props;
+
+const items = [
+  { label: 'Status', value: project.status && statusLabels[project.status], required: true },
+  { label: 'Type', value: project.type && typeLabels[project.type] },
+  { label: 'Engine', value: project.engine },
+  { label: 'Technologies', value: project.technologies?.join(', ') },
+  { label: 'My role', value: project.role },
+  { label: 'Team', value: project.team },
+  { label: 'Dates', value: project.dates },
+].filter((item) => item.value || item.required);
+
+const shown = variant === 'compact' ? items.slice(0, 3) : items;
+---
+
+<dl class:list={['meta', variant]}>
+  {
+    shown.map((item) => (
+      <div class="item">
+        <dt>{item.label}</dt>
+        <dd>{item.value ?? <Placeholder label={item.label.toLowerCase()} />}</dd>
+      </div>
+    ))
+  }
+</dl>
+
+<style>
+  .meta {
+    display: grid;
+    gap: var(--space-m) var(--space-xl);
+  }
+
+  .compact {
+    grid-template-columns: repeat(auto-fit, minmax(7.5rem, max-content));
+  }
+
+  .full {
+    grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  }
+
+  .item {
+    display: grid;
+    gap: var(--space-2xs);
+    align-content: start;
+  }
+</style>

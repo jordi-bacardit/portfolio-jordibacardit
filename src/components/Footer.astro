@@ -1,0 +1,136 @@
+---
+import Container from './Container.astro';
+import Logo from './Logo.astro';
+import { nav, site } from '../data/site';
+
+const year = new Date().getFullYear();
+
+// Optional here: missing links are hidden (the Contact page shows the placeholders).
+const elsewhere = [
+  site.linkedin ? { label: 'LinkedIn', href: site.linkedin, download: false } : null,
+  site.github ? { label: 'GitHub', href: site.github, download: false } : null,
+  site.cv ? { label: 'Download CV (PDF)', href: site.cv, download: true } : null,
+].filter((link) => link !== null);
+---
+
+<footer class="site-footer">
+  <Container class="inner">
+    <div class="identity">
+      <Logo size={56} />
+      <p class="name">{site.name}</p>
+      <p class="role">{site.role}</p>
+    </div>
+    <nav aria-label="Footer">
+      <ul role="list" class="links">
+        {
+          nav.map((item) => (
+            <li>
+              <a href={item.href}>{item.label}</a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+    {
+      elsewhere.length > 0 && (
+        <ul role="list" class="links">
+          {elsewhere.map((link) => (
+            <li>
+              <a href={link.href} download={link.download}>
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+    <div class="bottom">
+      <p>© {year} {site.name}</p>
+      <a href="#top">Back to top</a>
+    </div>
+  </Container>
+</footer>
+
+<style>
+  .site-footer {
+    margin-top: var(--space-3xl);
+    padding-block: var(--space-2xl) var(--space-l);
+    border-top: var(--border-thin) solid var(--color-line);
+  }
+
+  .inner {
+    display: grid;
+    gap: var(--space-xl);
+  }
+
+  .identity {
+    display: grid;
+    gap: var(--space-xs);
+    justify-items: start;
+  }
+
+  .name {
+    margin-top: var(--space-s);
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    font-weight: 600;
+    letter-spacing: var(--tracking-display);
+    line-height: var(--leading-display);
+    text-transform: uppercase;
+  }
+
+  .role,
+  .bottom {
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+  }
+
+  .links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap-min);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    text-transform: uppercase;
+  }
+
+  .links a:hover {
+    color: var(--color-accent);
+  }
+
+  .bottom {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-m);
+    padding-top: var(--space-l);
+    border-top: var(--border-thin) solid var(--color-line);
+  }
+
+  .bottom a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap-min);
+    text-decoration: none;
+  }
+
+  .bottom a:hover {
+    color: var(--color-accent);
+  }
+
+  @media (min-width: 48em) {
+    .inner {
+      grid-template-columns: 2fr 1fr 1fr;
+      align-items: start;
+    }
+
+    .bottom {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

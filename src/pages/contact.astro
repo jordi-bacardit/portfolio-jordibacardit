@@ -1,0 +1,132 @@
+---
+import Button from '../components/Button.astro';
+import Container from '../components/Container.astro';
+import Placeholder from '../components/Placeholder.astro';
+import { site } from '../data/site';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const channels = [
+  {
+    label: 'Email',
+    href: site.email ? `mailto:${site.email}` : null,
+    text: site.email,
+    todo: 'email',
+  },
+  {
+    label: 'LinkedIn',
+    href: site.linkedin,
+    text: site.linkedin?.replace(/^https?:\/\/(www\.)?/, ''),
+    todo: 'LinkedIn URL',
+  },
+  {
+    label: 'GitHub',
+    href: site.github,
+    text: site.github?.replace(/^https?:\/\/(www\.)?/, ''),
+    todo: 'GitHub URL',
+  },
+];
+---
+
+<BaseLayout
+  title="Contact"
+  description={`Contact ${site.name} about internships, junior roles, networking and collaboration in game production and game development.`}
+>
+  <Container class="page">
+    <div class="intro">
+      <h1>
+        <span>Let's</span>{" "}
+        <span class="muted">connect.</span>
+      </h1>
+      <p class="lead">
+        Open to internships, junior roles, networking and collaboration in game production and game
+        development.
+      </p>
+      {
+        site.email && (
+          <div>
+            <Button href={`mailto:${site.email}`} variant="primary">
+              Email me
+            </Button>
+          </div>
+        )
+      }
+    </div>
+
+    <dl class="channels">
+      {
+        channels.map((channel) => (
+          <div class="channel">
+            <dt>{channel.label}</dt>
+            <dd>
+              {channel.href ? (
+                <a href={channel.href}>{channel.text}</a>
+              ) : (
+                <Placeholder label={channel.todo} />
+              )}
+            </dd>
+          </div>
+        ))
+      }
+    </dl>
+  </Container>
+</BaseLayout>
+
+<style>
+  .page {
+    display: grid;
+    gap: var(--space-2xl);
+    padding-top: var(--space-2xl);
+  }
+
+  .intro {
+    display: grid;
+    gap: var(--space-l);
+    align-content: start;
+  }
+
+  h1 span {
+    display: block;
+  }
+
+  .muted {
+    color: var(--color-text-muted);
+  }
+
+  .lead {
+    font-size: var(--text-lg);
+  }
+
+  .channel {
+    display: grid;
+    gap: var(--space-xs);
+    padding-block: var(--space-l);
+    border-top: var(--border-thin) solid var(--color-line);
+  }
+
+  .channel:last-child {
+    border-bottom: var(--border-thin) solid var(--color-line);
+  }
+
+  .channel a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap-min);
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    overflow-wrap: anywhere;
+    text-decoration: none;
+  }
+
+  .channel a:hover {
+    color: var(--color-accent);
+  }
+
+  @media (min-width: 64em) {
+    .page {
+      grid-template-columns: 7fr 5fr;
+      align-items: end;
+    }
+  }
+</style>

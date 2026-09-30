@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+# TODO(content): add "Sitemap: https://<domain>/sitemap-index.xml" once the domain and sitemap exist.

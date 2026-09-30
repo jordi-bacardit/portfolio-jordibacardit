@@ -1,17 +1,224 @@
 ---
+import { Image } from 'astro:assets';
+import portrait from '../assets/jordi-portrait.png';
+import Button from '../components/Button.astro';
+import Container from '../components/Container.astro';
+import ProjectList from '../components/ProjectList.astro';
+import { site } from '../data/site';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getProjects } from '../lib/projects';
 
+const projects = await getProjects();
+const [firstName, ...lastName] = site.name.split(' ');
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<BaseLayout description={site.description}>
+  <Container as="section" class="hero" aria-labelledby="hero-title">
+    <h1 id="hero-title" class="name">
+      <span class="line"><span>{firstName}</span></span>{" "}
+      <span class="line"><span>{lastName.join(' ')}.</span></span>
+    </h1>
+    <div class="intro">
+      <p class="role">{site.role}</p>
+      <div class="details">
+        <p class="study">
+          {site.study.degree} student at {site.study.school}, focused on game production with a
+          technical game-development background.
+        </p>
+        <p class="status"><span class="dot" aria-hidden="true"></span>{site.lookingFor}.</p>
+        <div class="actions">
+          <Button href="/work" variant="primary">View work</Button>
+          <Button href="/contact">Contact me</Button>
+        </div>
+      </div>
+    </div>
+  </Container>
+
+  {
+    projects.length > 0 && (
+      <Container as="section" class="work" aria-labelledby="work-title">
+        <div class="section-head">
+          <h2 id="work-title">Work.</h2>
+          <a href="/work">All projects</a>
+        </div>
+        <ProjectList projects={projects} headingLevel={3} />
+      </Container>
+    )
+  }
+
+  <Container as="section" class="about" aria-labelledby="about-title">
+    <Image
+      src={portrait}
+      alt={`Portrait of ${site.name}`}
+      widths={[400, 800, 1000]}
+      sizes="(min-width: 64em) 30vw, 100vw"
+      class="portrait"
+    />
+    <div class="about-body">
+      <h2 id="about-title" class="statement">
+        Game production, backed by a technical game-development background.
+      </h2>
+      <Button href="/about">About me</Button>
+    </div>
+  </Container>
+</BaseLayout>
+
+<style>
+  .hero {
+    display: grid;
+    gap: var(--space-2xl);
+    padding-block: var(--space-2xl) var(--space-3xl);
+  }
+
+  .name {
+    font-size: var(--text-hero);
+    line-height: 0.8;
+  }
+
+  .line {
+    display: block;
+    overflow: hidden;
+    padding-bottom: 0.04em;
+  }
+
+  .line > span {
+    display: block;
+  }
+
+  .line + .line {
+    color: var(--color-text-muted);
+  }
+
+  .intro {
+    display: grid;
+    gap: var(--space-l);
+  }
+
+  .role {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+    text-transform: uppercase;
+  }
+
+  .details {
+    display: grid;
+    gap: var(--space-m);
+  }
+
+  .study {
+    color: var(--color-text-muted);
+    font-size: var(--text-lg);
+  }
+
+  .status {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-s);
+  }
+
+  .dot {
+    flex-shrink: 0;
+    width: 0.5rem;
+    height: 0.5rem;
+    background: var(--color-accent);
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-s);
+    margin-top: var(--space-xs);
+  }
+
+  /* The page's one orchestrated moment: the name rises into place on load. */
+  @media (prefers-reduced-motion: no-preference) {
+    .line > span {
+      animation: rise 700ms var(--ease-out) both;
+    }
+
+    .line + .line > span {
+      animation-delay: 90ms;
+    }
+
+    .intro {
+      animation: fade var(--duration-slow) var(--ease-out) 300ms both;
+    }
+  }
+
+  @keyframes rise {
+    from {
+      transform: translateY(105%);
+    }
+  }
+
+  @keyframes fade {
+    from {
+      opacity: 0;
+    }
+  }
+
+  .work {
+    display: grid;
+    gap: var(--space-xl);
+    padding-block: var(--space-2xl);
+  }
+
+  .section-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-m);
+  }
+
+  .section-head a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap-min);
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+  }
+
+  .about {
+    display: grid;
+    gap: var(--space-xl);
+    padding-block: var(--space-3xl) 0;
+  }
+
+  .portrait {
+    width: 100%;
+    max-width: 26rem;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    object-position: 50% 30%;
+  }
+
+  .about-body {
+    display: grid;
+    gap: var(--space-xl);
+    justify-items: start;
+    align-content: end;
+  }
+
+  .statement {
+    font-size: var(--text-2xl);
+    line-height: 0.95;
+  }
+
+  @media (min-width: 64em) {
+    .intro {
+      grid-template-columns: 1fr 1fr;
+      align-items: start;
+    }
+
+    .about {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+      align-items: end;
+    }
+  }
+</style>

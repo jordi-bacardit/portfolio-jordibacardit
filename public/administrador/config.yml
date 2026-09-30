@@ -1,0 +1,62 @@
+# Sveltia CMS: the Game Library editor at /administrador/.
+# Saving commits to GitHub, so only accounts with write access to the repo can change content.
+# Sign in with "Sign In with Token": a fine-grained personal access token limited to this
+# repository, with the "Contents: Read and write" permission.
+# Docs: https://sveltiacms.app/en/docs/backends/github
+
+backend:
+  name: github
+  repo: jordi-bacardit/portfolio-jordibacardit
+  branch: main
+
+# Screenshots go to src/assets/ so Astro can optimize them (resolved in src/lib/games.ts).
+media_folder: /src/assets/games
+public_folder: /src/assets/games
+
+output:
+  omit_empty_optional_fields: true
+
+collections:
+  - name: games
+    label: Game Library
+    label_singular: Game
+    folder: src/content/games
+    extension: md
+    format: frontmatter
+    create: true
+    delete: true
+    slug: '{{slug}}'
+    identifier_field: title
+    fields:
+      - name: title
+        label: Title
+        widget: string
+      - name: platforms
+        label: Platforms
+        widget: list
+        hint: One platform per row, e.g. PC, PlayStation 5, Nintendo Switch.
+      - name: genre
+        label: Genre
+        widget: string
+      - name: status
+        label: Status
+        widget: select
+        options:
+          - { label: Playing, value: playing }
+          - { label: Played, value: played }
+          - { label: Favourite, value: favourite }
+          - { label: Formative, value: formative }
+      - name: note
+        label: My note
+        widget: text
+        hint: Why this game matters to me. Leave an empty line between paragraphs.
+      - name: image
+        label: Screenshot
+        widget: image
+        required: false
+        hint: Your own screenshot preferred.
+      - name: imageAlt
+        label: Screenshot description
+        widget: string
+        required: false
+        hint: What the screenshot shows, for people who can't see it.

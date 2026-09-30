@@ -1,0 +1,83 @@
+---
+import { Font } from 'astro:assets';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { site } from '../data/site';
+import '../styles/tokens.css';
+import '../styles/global.css';
+
+interface Props {
+  /** Page name, e.g. "Work". Omit on the home page. */
+  title?: string;
+  description: string;
+  /** Root-relative or absolute URL of the Open Graph image. */
+  image?: string;
+}
+
+const { title, description, image } = Astro.props;
+
+const fullTitle = title ? `${title} — ${site.name}` : `${site.name} — ${site.role}`;
+const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : undefined;
+// TODO(content): default Open Graph image (1200×630) for pages without their own.
+const ogImage = image && Astro.site ? new URL(image, Astro.site).href : undefined;
+---
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script is:inline>
+      document.documentElement.classList.replace('no-js', 'js');
+    </script>
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    {canonical && <link rel="canonical" href={canonical} />}
+    <!-- TODO(content): replace public/favicon.svg and favicon.ico (Astro defaults) with the logo. -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    {canonical && <meta property="og:url" content={canonical} />}
+    {ogImage && <meta property="og:image" content={ogImage} />}
+    <meta name="twitter:card" content={ogImage ? 'summary_large_image' : 'summary'} />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    {ogImage && <meta name="twitter:image" content={ogImage} />}
+    <Font cssVariable="--font-familjen-grotesk" preload={[{ style: 'normal' }]} />
+    <Font cssVariable="--font-jetbrains-mono" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <Header />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>
+
+<style>
+  .skip-link {
+    position: absolute;
+    top: var(--space-xs);
+    left: var(--space-xs);
+    z-index: 100;
+    padding: var(--space-s) var(--space-m);
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+    font-weight: 600;
+    text-decoration: none;
+    transform: translateY(-200%);
+  }
+
+  .skip-link:focus {
+    transform: none;
+  }
+
+  main {
+    flex: 1;
+  }
+</style>

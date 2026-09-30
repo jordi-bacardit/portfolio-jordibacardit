@@ -1,0 +1,61 @@
+/* Design tokens: the only place for raw colour, font, type-scale and spacing values. */
+
+:root {
+  color-scheme: dark;
+
+  /* Colour */
+  --color-bg: #0a0c10;
+  --color-surface: #12151b;
+  --color-text: #e7e9ed;
+  --color-text-muted: #9ca3ae;
+  --color-line: #262b34;
+  --color-accent: #d8ff00;
+  --color-on-accent: #0a0c10;
+  /* Darkens artwork behind card text so it stays readable (WCAG AA). */
+  --color-scrim: rgb(10 12 16 / 0.85);
+
+  /* Font families (the raw variables come from the Fonts API in astro.config.mjs).
+     Mono is only for small labels: metadata, buttons and the header status. */
+  --font-display: var(--font-familjen-grotesk);
+  --font-body: var(--font-familjen-grotesk);
+  --font-mono: var(--font-jetbrains-mono);
+
+  /* Type scale */
+  --text-label: 0.8125rem;
+  --text-sm: 0.875rem;
+  --text-base: 1.0625rem;
+  --text-lg: clamp(1.1875rem, 1.1rem + 0.4vw, 1.375rem);
+  --text-xl: clamp(1.5rem, 1.25rem + 1vw, 2rem);
+  --text-2xl: clamp(2.25rem, 1.5rem + 3.2vw, 4.5rem);
+  --text-3xl: clamp(3rem, 1rem + 8vw, 8.5rem);
+  --text-hero: clamp(3.25rem, 17vw, 17rem);
+
+  --leading-display: 0.82;
+  --leading-body: 1.55;
+  --tracking-display: -0.055em;
+  --tracking-label: 0.12em;
+  --measure: 68ch;
+
+  /* Space */
+  --space-2xs: 0.25rem;
+  --space-xs: 0.5rem;
+  --space-s: 0.75rem;
+  --space-m: 1rem;
+  --space-l: 1.5rem;
+  --space-xl: 2.5rem;
+  --space-2xl: clamp(3rem, 2rem + 4vw, 5rem);
+  --space-3xl: clamp(4.5rem, 3rem + 7vw, 9rem);
+
+  --gutter: clamp(1rem, 0.5rem + 2.5vw, 3rem);
+  --page-max: 90rem;
+  --header-height: 4.5rem;
+  --tap-min: 2.75rem;
+  --border-thin: 1px;
+  --border-strong: 2px;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-fast: 150ms;
+  --duration-base: 250ms;
+  --duration-slow: 400ms;
+}

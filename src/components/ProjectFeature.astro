@@ -1,0 +1,109 @@
+---
+// The featured project, shown large. Artwork leads when a cover exists; without one
+// the title carries the composition. Never padded with invented media.
+import { Picture } from 'astro:assets';
+import Button from './Button.astro';
+import ProjectMeta from './ProjectMeta.astro';
+import type { Project } from '../lib/projects';
+
+interface Props {
+  project: Project;
+  headingLevel?: 2 | 3;
+  /** Load the cover eagerly when the block sits above the fold. */
+  eager?: boolean;
+}
+
+const { project, headingLevel = 2, eager = false } = Astro.props;
+const { title, summary, cover, coverAlt } = project.data;
+const Heading = `h${headingLevel}` as 'h2' | 'h3';
+const href = `/work/${project.id}`;
+---
+
+<article class:list={['feature', { 'has-cover': cover }]}>
+  {
+    cover && (
+      <a class="media" href={href} tabindex="-1" aria-hidden="true">
+        <Picture
+          src={cover}
+          alt={coverAlt ?? ''}
+          formats={['avif', 'webp']}
+          widths={[640, 960, 1280, 1920]}
+          sizes="(min-width: 64em) 60vw, 100vw"
+          loading={eager ? 'eager' : 'lazy'}
+          fetchpriority={eager ? 'high' : undefined}
+        />
+      </a>
+    )
+  }
+  <div class="body">
+    <Heading class="title">
+      <a href={href}>{title}</a>
+    </Heading>
+    <p class="summary">{summary}</p>
+    <ProjectMeta project={project.data} variant="compact" />
+    <div class="action">
+      <Button href={href} variant="primary">View project</Button>
+    </div>
+  </div>
+</article>
+
+<style>
+  .feature {
+    display: grid;
+    gap: var(--space-xl);
+  }
+
+  .media {
+    display: block;
+    overflow: hidden;
+    background: var(--color-surface);
+  }
+
+  .media :global(img) {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    transition: transform var(--duration-slow) var(--ease-out);
+  }
+
+  .feature:hover .media :global(img) {
+    transform: scale(1.03);
+  }
+
+  .body {
+    display: grid;
+    gap: var(--space-l);
+    align-content: start;
+  }
+
+  .title {
+    font-size: var(--text-3xl);
+  }
+
+  .title a {
+    text-decoration: none;
+  }
+
+  .title a:hover {
+    color: var(--color-accent);
+  }
+
+  .summary {
+    font-size: var(--text-lg);
+  }
+
+  .action {
+    margin-top: var(--space-xs);
+  }
+
+  @media (min-width: 64em) {
+    .has-cover {
+      grid-template-columns: 3fr 2fr;
+      align-items: end;
+    }
+
+    .has-cover .title {
+      font-size: var(--text-2xl);
+    }
+  }
+</style>
