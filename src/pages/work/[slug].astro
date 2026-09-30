@@ -3,10 +3,9 @@ import { getImage, Image, Picture } from 'astro:assets';
 import Button from '../../components/Button.astro';
 import Container from '../../components/Container.astro';
 import ProjectMeta from '../../components/ProjectMeta.astro';
-import SplitText from '../../components/SplitText.astro';
 import YouTubeVideo from '../../components/YouTubeVideo.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getProjects, playLabel, type Project } from '../../lib/projects';
+import { getProjects, playLabel, transitionStyles, type Project } from '../../lib/projects';
 import { paragraphs } from '../../lib/text';
 
 export async function getStaticPaths() {
@@ -40,6 +39,9 @@ const {
   highlights,
 } = project.data;
 
+// The card's title and cover morph into these (see transitionStyles).
+const morph = transitionStyles(project.id);
+
 // The same sections, in the same order, on every project; empty ones are hidden.
 const sections = [
   { id: 'overview', title: 'Overview.', text: paragraphs(overview) },
@@ -64,7 +66,7 @@ const shots = gallery ?? [];
   <article>
     <Container as="header" class="hero">
       <div class="heading">
-        <h1><SplitText text={title} /></h1>
+        <h1 style={morph.title}>{title}</h1>
         <p class="pitch">{summary}</p>
       </div>
       <aside class="details" aria-label="Project details">
@@ -94,6 +96,7 @@ const shots = gallery ?? [];
             sizes="(min-width: 90rem) 90rem, 100vw"
             loading="eager"
             fetchpriority="high"
+            style={morph.cover}
           />
         </Container>
       )

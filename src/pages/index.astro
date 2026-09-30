@@ -185,12 +185,15 @@ const [firstName, ...lastName] = site.name.split(' ');
     padding-block: var(--space-3xl) 0;
   }
 
+  /* Same treatment as the About portrait: black and white, fading into the page at the bottom. */
   .portrait {
     width: 100%;
     max-width: 26rem;
     aspect-ratio: 4 / 5;
     object-fit: cover;
     object-position: 50% 30%;
+    filter: grayscale(1) contrast(1.08);
+    mask-image: linear-gradient(to top, transparent, black 40%);
   }
 
   .about-body {

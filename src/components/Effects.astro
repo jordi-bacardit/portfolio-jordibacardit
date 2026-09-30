@@ -1,14 +1,17 @@
 ---
 // Site-wide ambience and pointer feedback, all decorative and opt-in by data attributes:
 // - film grain behind the content;
-// - a cursor ring that trails the pointer (the system cursor stays) on mouse devices;
+// - a cursor ring that trails the pointer (the system cursor stays) on mouse devices; it grows
+//   over links and buttons, and over [data-cursor="Label"] it fills and shows that label;
 // - [data-scramble]: letters decode on hover/focus;
 // - [data-spotlight]: sets --spot-x/--spot-y so the element can draw a light under the pointer.
 // Movement is skipped with prefers-reduced-motion; pointer effects only run with a mouse.
 ---
 
 <div class="grain" aria-hidden="true"></div>
-<div class="cursor" aria-hidden="true" data-cursor-ring><span class="ring"></span></div>
+<div class="cursor" aria-hidden="true" data-cursor-ring>
+  <span class="ring"><span class="label" data-cursor-label></span></span>
+</div>
 
 <script>
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -44,25 +47,38 @@
     document.documentElement.addEventListener('pointerleave', () => {
       cursor.classList.remove('is-visible');
     });
+    const label = cursor.querySelector<HTMLElement>('[data-cursor-label]');
     document.addEventListener('pointerover', (event) => {
       const target = event.target as Element | null;
-      cursor.classList.toggle('is-active', Boolean(target?.closest('a, button, [data-cursor]')));
+      // Over an embedded player the pointer moves inside the iframe, so the ring would freeze: hide it.
+      if (target?.tagName === 'IFRAME') {
+        cursor.classList.remove('is-visible');
+        return;
+      }
+      const labelled = target?.closest<HTMLElement>('[data-cursor]');
+      if (labelled && label) label.textContent = labelled.dataset.cursor ?? '';
+      cursor.classList.toggle('has-label', Boolean(labelled));
+      cursor.classList.toggle('is-active', !labelled && Boolean(target?.closest('a, button')));
     });
   }
 
   const glyphs = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#/_';
 
   // Splits the element's text into fixed-width letters once; the element keeps its name via aria-label.
+  // Everything goes inside one inline wrapper: in flex containers (buttons, nav links) loose
+  // spaces between the word spans would otherwise be dropped.
   function letters(element: HTMLElement): HTMLElement[] {
     if (!element.dataset.scrambleReady) {
       const text = (element.textContent ?? '').trim().replace(/\s+/g, ' ');
       element.setAttribute('aria-label', text);
       element.textContent = '';
+      const wrapper = document.createElement('span');
+      wrapper.className = 'scramble-text';
+      wrapper.setAttribute('aria-hidden', 'true');
       text.split(' ').forEach((word, index) => {
-        if (index > 0) element.append(' ');
+        if (index > 0) wrapper.append(' ');
         const wordEl = document.createElement('span');
         wordEl.className = 'scramble-word';
-        wordEl.setAttribute('aria-hidden', 'true');
         for (const char of word) {
           const charEl = document.createElement('span');
           charEl.className = 'scramble-char';
@@ -70,16 +86,28 @@
           charEl.textContent = char;
           wordEl.append(charEl);
         }
-        element.append(wordEl);
+        wrapper.append(wordEl);
       });
+      element.append(wrapper);
       element.dataset.scrambleReady = 'true';
     }
     return [...element.querySelectorAll<HTMLElement>('.scramble-char')];
   }
 
   function initScramble() {
+    const finishers: (() => void)[] = [];
     document.querySelectorAll<HTMLElement>('[data-scramble]').forEach((element) => {
       let frame = 0;
+      // Puts every letter back at once, e.g. before the page transition snapshots the text.
+      const finish = () => {
+        if (!frame) return;
+        cancelAnimationFrame(frame);
+        frame = 0;
+        letters(element).forEach((char) => {
+          char.textContent = char.dataset.char ?? '';
+          char.style.width = '';
+        });
+      };
       const play = () => {
         if (frame) return;
         const chars = letters(element);
@@ -105,7 +133,11 @@
       };
       element.addEventListener('mouseenter', play);
       element.addEventListener('focus', play);
+      element.addEventListener('click', finish);
+      finishers.push(finish);
     });
+    // Leaving the page (link, back button...): settle all text before the old page is captured.
+    window.addEventListener('pageswap', () => finishers.forEach((finish) => finish()));
   }
 
   function initSpotlight() {
@@ -152,21 +184,45 @@
     opacity: 1;
   }
 
+  /* The ring is centred on the pointer: its size drives the negative margins. */
   .ring {
-    display: block;
-    width: 2rem;
-    height: 2rem;
-    margin: -1rem 0 0 -1rem;
+    --ring-size: 2rem;
+    display: grid;
+    place-items: center;
+    width: var(--ring-size);
+    height: var(--ring-size);
+    margin: calc(var(--ring-size) / -2) 0 0 calc(var(--ring-size) / -2);
     border: var(--border-thin) solid var(--color-accent);
     border-radius: 50%;
     transition:
-      transform var(--duration-base) var(--ease-out),
+      width var(--duration-base) var(--ease-out),
+      height var(--duration-base) var(--ease-out),
+      margin var(--duration-base) var(--ease-out),
       background-color var(--duration-base) var(--ease-out);
   }
 
   .cursor.is-active .ring {
+    --ring-size: 3.5rem;
     background: var(--color-accent-glow);
-    transform: scale(1.8);
+  }
+
+  .cursor.has-label .ring {
+    --ring-size: 5.5rem;
+    background: var(--color-accent);
+  }
+
+  .label {
+    color: var(--color-on-accent);
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    opacity: 0;
+    transition: opacity var(--duration-fast) var(--ease-out);
+  }
+
+  .cursor.has-label .label {
+    opacity: 1;
   }
 
   :global(.scramble-word) {

@@ -20,7 +20,7 @@ if (!id) {
 }
 ---
 
-<div class="video" data-youtube-id={id} data-youtube-title={title}>
+<div class="video" data-youtube-id={id} data-youtube-title={title} data-cursor="Play">
   <a class="facade" href={`https://www.youtube.com/watch?v=${id}`} data-youtube-play>
     {
       poster ? (
@@ -67,6 +67,7 @@ if (!id) {
       iframe.allowFullscreen = true;
       iframe.referrerPolicy = 'strict-origin-when-cross-origin';
       container.replaceChildren(iframe);
+      delete container.dataset.cursor; // the player is live: no "Play" cursor label any more
       iframe.focus();
     });
   });

@@ -44,10 +44,15 @@ const channels = [
       </p>
       {
         site.email && (
-          <div>
+          <div class="actions">
             <Button href={`mailto:${site.email}`} variant="primary">
               Email me
             </Button>
+            {/* For visitors without a mail app: copies the address. Needs JS, so hidden until the script runs. */}
+            <Button data-copy-email={site.email} hidden>
+              <span data-copy-label>Copy email</span>
+            </Button>
+            <span class="visually-hidden" aria-live="polite" data-copy-status></span>
           </div>
         )
       }
@@ -72,6 +77,31 @@ const channels = [
   </Container>
 </BaseLayout>
 
+<script>
+  const copyButton = document.querySelector<HTMLButtonElement>('[data-copy-email]');
+  const label = copyButton?.querySelector<HTMLElement>('[data-copy-label]');
+  const status = document.querySelector<HTMLElement>('[data-copy-status]');
+
+  if (copyButton && label && navigator.clipboard) {
+    copyButton.hidden = false;
+    let reset = 0;
+    copyButton.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(copyButton.dataset.copyEmail ?? '');
+        label.textContent = 'Copied';
+        if (status) status.textContent = 'Email address copied to the clipboard.';
+      } catch {
+        label.textContent = "Couldn't copy";
+      }
+      window.clearTimeout(reset);
+      reset = window.setTimeout(() => {
+        label.textContent = 'Copy email';
+        if (status) status.textContent = '';
+      }, 2000);
+    });
+  }
+</script>
+
 <style>
   .page {
     display: grid;
@@ -95,6 +125,12 @@ const channels = [
 
   .lead {
     font-size: var(--text-lg);
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-s);
   }
 
   .channel {

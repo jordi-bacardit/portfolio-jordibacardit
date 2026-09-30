@@ -1,4 +1,7 @@
 ---
+// 404 as a game-over screen. The "Continue?" countdown sends people home after 10 seconds;
+// "Stay here" stops it (a redirect on a timer must be stoppable). Without JS there's no
+// countdown, just the Continue button.
 import Button from '../components/Button.astro';
 import Container from '../components/Container.astro';
 import SplitText from '../components/SplitText.astro';
@@ -6,19 +9,146 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
 <BaseLayout title="Page not found" description="This page doesn't exist.">
-  <Container class="page">
-    <h1><SplitText text="Page not found" /></h1>
-    <p>This page doesn't exist or has moved.</p>
-    <div>
-      <Button href="/" variant="primary">Go to the home page</Button>
+  <Container class="screen">
+    <p class="code">Error 404</p>
+    <h1 class="title">
+      <SplitText text="Game over." /><span class="visually-hidden"> Page not found.</span>
+    </h1>
+    <p class="lead">This page doesn't exist or has moved.</p>
+
+    <p class="continue" data-continue hidden>
+      <span class="prompt">Continue?</span>{" "}
+      <span class="count" data-count>10</span>
+    </p>
+
+    <div class="actions">
+      <Button href="/" variant="primary" data-continue-link>
+        Continue<span class="visually-hidden"> to the home page</span>
+      </Button>
+      <Button data-stay hidden>Stay here</Button>
     </div>
+    <p class="visually-hidden" aria-live="polite" data-count-status></p>
   </Container>
 </BaseLayout>
 
+<script>
+  const box = document.querySelector<HTMLElement>('[data-continue]');
+  const count = document.querySelector<HTMLElement>('[data-count]');
+  const stay = document.querySelector<HTMLButtonElement>('[data-stay]');
+  const status = document.querySelector<HTMLElement>('[data-count-status]');
+  const continueLink = document.querySelector<HTMLElement>('[data-continue-link]');
+
+  if (box && count && stay) {
+    let seconds = 10;
+    box.hidden = false;
+    stay.hidden = false;
+    if (status) status.textContent = 'Returning to the home page in 10 seconds.';
+
+    const timer = window.setInterval(() => {
+      seconds -= 1;
+      count.textContent = String(seconds);
+      if (seconds <= 0) {
+        window.clearInterval(timer);
+        window.location.href = '/';
+      }
+    }, 1000);
+
+    stay.addEventListener('click', () => {
+      window.clearInterval(timer);
+      box.hidden = true;
+      stay.hidden = true;
+      if (status) status.textContent = 'Countdown stopped.';
+      continueLink?.focus();
+    });
+  }
+</script>
+
 <style>
-  .page {
+  .screen {
+    position: relative;
     display: grid;
+    justify-items: center;
+    align-content: center;
     gap: var(--space-l);
+    min-height: calc(100svh - var(--header-height) * 2);
     padding-block: var(--space-2xl);
+    text-align: center;
+  }
+
+  /* CRT scanlines: a nod to arcade game-over screens. */
+  .screen::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0 3px,
+      color-mix(in srgb, var(--color-surface) 70%, transparent) 3px 4px
+    );
+    pointer-events: none;
+  }
+
+  .code,
+  .prompt {
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+  }
+
+  .code {
+    color: var(--color-text-muted);
+  }
+
+  .title {
+    font-size: clamp(3.5rem, 1rem + 13vw, 14rem);
+  }
+
+  .lead {
+    color: var(--color-text-muted);
+    font-size: var(--text-lg);
+  }
+
+  .continue {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-s);
+  }
+
+  .continue[hidden] {
+    display: none;
+  }
+
+  .prompt {
+    color: var(--color-accent);
+  }
+
+  .count {
+    min-width: 2ch;
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    font-weight: 600;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-s);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .prompt {
+      animation: blink 1.2s step-end infinite;
+    }
+  }
+
+  @keyframes blink {
+    50% {
+      opacity: 0;
+    }
   }
 </style>

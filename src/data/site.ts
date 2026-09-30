@@ -18,13 +18,14 @@ export const site = {
     country: 'Spain',
     graduationYear: null as string | null, // TODO(content): graduation year
   },
+  location: 'Barcelona, Spain',
+  openToRelocation: true,
   lookingFor: 'Open to internships and junior roles in the European games industry',
   status: 'Open to internships and junior roles',
-  email: null as string | null, // TODO(content): email address
-  linkedin: null as string | null, // TODO(content): LinkedIn profile URL
-  github: null as string | null, // TODO(content): GitHub profile URL
-  // TODO(content): add the PDF as public/cv/jordi-bacardit-cv.pdf, then set this to '/cv/jordi-bacardit-cv.pdf'.
-  cv: null as string | null,
+  email: 'jordibacardit12@gmail.com' as string | null,
+  linkedin: 'https://www.linkedin.com/in/jordi-bacardit/' as string | null,
+  github: 'https://github.com/jordi-bacardit' as string | null,
+  cv: '/cv/jordi-bacardit-cv.pdf' as string | null,
 };
 
 export const nav: NavItem[] = [

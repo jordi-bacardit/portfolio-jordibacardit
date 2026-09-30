@@ -22,6 +22,17 @@ export async function getProjects(): Promise<Project[]> {
   return projects.sort((a, b) => a.data.order - b.data.order);
 }
 
+/**
+ * Shared view-transition names: a card's title and cover morph into the same elements on the
+ * project page. Covers also get the "project-cover" class so global.css can keep them cropped.
+ */
+export function transitionStyles(id: string) {
+  return {
+    title: `view-transition-name: project-title-${id}`,
+    cover: `view-transition-name: project-cover-${id}; view-transition-class: project-cover`,
+  };
+}
+
 /** Button label for a playable build: names itch.io when the link points there. */
 export function playLabel(url: string) {
   return new URL(url).hostname.endsWith('itch.io') ? 'Play on itch.io' : 'Play the build';

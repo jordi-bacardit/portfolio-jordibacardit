@@ -3,7 +3,7 @@
 // Carries the title plus up to three metadata values (and the pitch when large).
 import { Picture } from 'astro:assets';
 import ProjectMeta from './ProjectMeta.astro';
-import type { Project } from '../lib/projects';
+import { transitionStyles, type Project } from '../lib/projects';
 
 interface Props {
   project: Project;
@@ -16,9 +16,10 @@ interface Props {
 const { project, size = 'small', headingLevel = 2, eager = false } = Astro.props;
 const { title, summary, cover } = project.data;
 const Heading = `h${headingLevel}` as 'h2' | 'h3';
+const morph = transitionStyles(project.id);
 ---
 
-<article class:list={['card', size, { 'has-cover': cover }]} data-spotlight>
+<article class:list={['card', size, { 'has-cover': cover }]} data-spotlight data-cursor="View">
   {
     cover && (
       <Picture
@@ -30,11 +31,12 @@ const Heading = `h${headingLevel}` as 'h2' | 'h3';
         sizes={size === 'large' ? '(min-width: 64em) 60vw, 100vw' : '(min-width: 64em) 40vw, 100vw'}
         loading={eager ? 'eager' : 'lazy'}
         fetchpriority={eager ? 'high' : undefined}
+        style={morph.cover}
       />
     )
   }
   <div class="info">
-    <Heading class="title">
+    <Heading class="title" style={morph.title}>
       <a href={`/work/${project.id}`} data-scramble>{title}</a>
     </Heading>
     {size === 'large' && <p class="summary">{summary}</p>}

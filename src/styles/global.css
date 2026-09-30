@@ -152,6 +152,19 @@ a:hover {
   ::view-transition-new(root) {
     animation: page-in 550ms var(--ease-out) both;
   }
+
+  /* Morph: shared elements (a project card's title and cover) fly to their place on the new page. */
+  ::view-transition-group(*) {
+    animation-duration: 550ms;
+    animation-timing-function: var(--ease-out);
+  }
+
+  /* Covers keep their crop while they change shape, instead of stretching. */
+  ::view-transition-old(*.project-cover),
+  ::view-transition-new(*.project-cover) {
+    height: 100%;
+    object-fit: cover;
+  }
 }
 
 @keyframes page-out {

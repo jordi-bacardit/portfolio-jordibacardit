@@ -9,41 +9,72 @@ import { site, technologies } from '../data/site';
 import BaseLayout from '../layouts/BaseLayout.astro';
 
 const { study } = site;
+
+const facts = [
+  { label: 'Studying', value: study.degree },
+  { label: 'University', value: `${study.school}, ${study.country}` },
+  {
+    label: 'Based in',
+    value: `${site.location}${site.openToRelocation ? ', open to relocation' : ''}`,
+  },
+  { label: 'Focus', value: 'Game production, with a technical game-development background' },
+  { label: 'Open to', value: 'Internships and junior roles' },
+  ...(study.graduationYear ? [{ label: 'Graduation', value: study.graduationYear }] : []),
+];
 ---
 
 <BaseLayout
   title="About"
   description={`About ${site.name}: ${study.degree} student at ${study.school}, focused on game production with a technical game-development background.`}
 >
-  <Container class="intro">
-    <div class="copy">
-      <h1><SplitText text="Who I am." /></h1>
+  <section class="hero" aria-labelledby="about-title">
+    <div class="photo">
+      <Image
+        src={portrait}
+        alt={`Portrait of ${site.name}`}
+        widths={[640, 960, 1280, 1600]}
+        sizes="(min-width: 64em) 50vw, 100vw"
+        loading="eager"
+        fetchpriority="high"
+        class="portrait"
+      />
+    </div>
+    <div class="hero-text">
+      <h1 id="about-title"><SplitText text="Who I am." /></h1>
       <p class="lead">
         I'm {site.name}, a {study.degree} student at {study.school}, {study.country}.
       </p>
     </div>
-    <Image
-      src={portrait}
-      alt={`Portrait of ${site.name}`}
-      widths={[480, 800, 1200]}
-      sizes="(min-width: 64em) 40vw, 100vw"
-      loading="eager"
-      class="portrait"
-    />
+  </section>
+
+  <Container as="section" class="facts" aria-label="At a glance">
+    <dl>
+      {
+        facts.map((fact) => (
+          <div class="fact">
+            <dt>{fact.label}</dt>
+            <dd>{fact.value}</dd>
+          </div>
+        ))
+      }
+    </dl>
   </Container>
 
   <Container as="section" class="focus" aria-labelledby="focus-title">
-    <h2 id="focus-title">Focus.</h2>
+    <h2 id="focus-title" class="statement">
+      Game production, backed by a technical game-development background.
+    </h2>
     <div class="text">
       <p>
         My focus is game production: project coordination, planning, production pipelines and team
-        coordination. It's backed by a technical game-development background: I've built projects in
-        Unity and Unreal Engine, and I've worked with C#, C++ and the other languages and tools
-        listed below.
+        coordination.
+      </p>
+      <p>
+        It's backed by a technical game-development background: I've built projects in Unity and
+        Unreal Engine, and I've worked with C#, C++ and the other languages and tools below.
       </p>
       <p>I'm looking for internships and junior roles in game production in the European games industry.</p>
-      {study.graduationYear && <p>Expected graduation: {study.graduationYear}.</p>}
-      <div class="cv">
+      <div class="actions">
         {
           site.cv ? (
             <Button href={site.cv} variant="primary" download>
@@ -53,16 +84,17 @@ const { study } = site;
             <Placeholder label="CV file" />
           )
         }
+        <Button href="/contact">Contact me</Button>
       </div>
     </div>
   </Container>
 
   <Container as="section" class="tech" aria-labelledby="tech-title">
     <h2 id="tech-title">Tools.</h2>
-    <dl class="groups">
+    <dl class="tech-list">
       {
         technologies.map((group) => (
-          <div class="group">
+          <div class="tech-row">
             <dt>{group.category}</dt>
             <dd>
               <ul role="list">
@@ -79,74 +111,172 @@ const { study } = site;
 </BaseLayout>
 
 <style>
-  .intro {
+  /* Hero: the portrait bleeds to the edge and fades into the page; the title runs over its dark edge. */
+  .hero {
     display: grid;
-    gap: var(--space-xl);
-    padding-block: var(--space-2xl);
   }
 
-  .copy {
-    display: grid;
-    gap: var(--space-l);
-    align-content: end;
-  }
-
-  .lead {
-    font-size: var(--text-lg);
+  /* The photo fades out with a mask (not an overlay), so the page background and its grain
+     show through and there's no visible seam. */
+  .photo {
+    position: relative;
+    height: min(75svh, 34rem);
+    overflow: hidden;
+    mask-image: linear-gradient(to top, transparent, black 45%);
   }
 
   .portrait {
     width: 100%;
-    max-height: 80svh;
-    aspect-ratio: 4 / 5;
+    height: 100%;
     object-fit: cover;
-    object-position: 50% 30%;
-    border: var(--border-thin) solid var(--color-line);
+    object-position: 50% 28%;
+    filter: grayscale(1) contrast(1.08);
   }
 
-  .focus,
-  .tech {
+  .hero-text {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    gap: var(--space-l);
+    margin-top: -0.55em;
+    padding-inline: var(--gutter);
+    padding-bottom: var(--space-2xl);
+    font-size: clamp(3.5rem, 1rem + 11vw, 10rem);
+  }
+
+  .hero-text h1 {
+    font-size: 1em;
+  }
+
+  .lead {
+    max-width: 34rem;
+    font-size: var(--text-lg);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .portrait {
+      animation: settle 1.2s var(--ease-out) both;
+    }
+  }
+
+  @keyframes settle {
+    from {
+      opacity: 0;
+      transform: scale(1.06);
+    }
+  }
+
+  @media (min-width: 64em) {
+    /* The first screen: the block is as tall as the viewport, and the photo fills its half
+       without its own height stretching it. */
+    .hero {
+      grid-template-columns: 1fr 1fr;
+      height: calc(100svh - var(--header-height));
+      min-height: 38rem;
+      max-height: 60rem;
+    }
+
+    .photo {
+      grid-column: 2;
+      grid-row: 1;
+      height: auto;
+      mask-image:
+        linear-gradient(to right, transparent, black 40%),
+        linear-gradient(to top, transparent, black 30%);
+      mask-composite: intersect;
+    }
+
+    .portrait {
+      position: absolute;
+      inset: 0;
+    }
+
+    .hero-text {
+      grid-column: 1 / -1;
+      grid-row: 1;
+      align-self: end;
+      margin-top: 0;
+      padding-block: var(--space-2xl);
+      padding-left: max(var(--gutter), calc((100% - var(--page-max)) / 2 + var(--gutter)));
+      font-size: clamp(5rem, 1rem + 10.5vw, 12rem);
+    }
+  }
+
+  /* At a glance */
+  .facts dl {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+    border-block: var(--border-thin) solid var(--color-line);
+  }
+
+  .fact {
+    display: grid;
+    gap: var(--space-xs);
+    align-content: start;
+    padding: var(--space-l) var(--space-l) var(--space-l) 0;
+  }
+
+  .fact dd {
+    font-size: var(--text-lg);
+    line-height: 1.35;
+  }
+
+  /* Focus */
+  .focus {
     display: grid;
     gap: var(--space-xl);
-    padding-block: var(--space-2xl);
+    padding-block: var(--space-3xl);
+  }
+
+  .statement {
+    font-size: var(--text-2xl);
+    line-height: 0.95;
   }
 
   .text {
     display: grid;
     gap: var(--space-m);
+    align-content: start;
     font-size: var(--text-lg);
   }
 
-  .cv {
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-s);
     margin-top: var(--space-m);
   }
 
-  .groups {
+  /* Tools */
+  .tech {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
-    gap: var(--space-xl) var(--space-l);
+    gap: var(--space-xl);
+    padding-bottom: var(--space-2xl);
   }
 
-  .group {
+  .tech-row {
     display: grid;
-    gap: var(--space-s);
-    align-content: start;
-    padding-top: var(--space-m);
+    gap: var(--space-s) var(--space-xl);
+    padding-block: var(--space-l);
     border-top: var(--border-thin) solid var(--color-line);
   }
 
-  .group ul {
-    display: grid;
-    gap: var(--space-2xs);
+  .tech-row ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs) var(--space-l);
     font-size: var(--text-lg);
   }
 
-  @media (min-width: 64em) {
-    .intro {
-      grid-template-columns: 7fr 5fr;
-      align-items: end;
+  @media (min-width: 48em) {
+    .tech-row {
+      grid-template-columns: 11rem 1fr;
+      align-items: baseline;
     }
+  }
 
+  @media (min-width: 64em) {
     .focus,
     .tech {
       grid-template-columns: 5fr 7fr;

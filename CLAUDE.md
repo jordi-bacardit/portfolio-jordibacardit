@@ -76,7 +76,8 @@ Confirmed facts:
 - Unreal Engine gameplay prototype: an actor/trigger system; reaching the trigger restarts the level. Nothing else confirmed.
 - TFG (Final Degree Project): AI and video games, not built yet. Two candidate directions: "ArtScan AI" (not defined; don't describe it) and a small Unreal Engine RPG with AI-driven NPCs. Always labelled Upcoming / In development / TFG. No screenshots, features or results.
 - Domain: https://jordibacardit.com (hosted on Netlify, deployed from GitHub `main`).
-- Still TODO: graduation year, email, LinkedIn URL, GitHub URL, CV file.
+- Contact and CV (from my CV, `public/cv/jordi-bacardit-cv.pdf`): email jordibacardit12@gmail.com, LinkedIn https://www.linkedin.com/in/jordi-bacardit/, based in Barcelona, Spain, open to relocation. Other CV details (graduation year, Lost On The Gates specifics, other projects, work experience, languages) are not approved for the site yet: ask before using them.
+- GitHub: https://github.com/jordi-bacardit
 
 <!-- Cuando confirmes datos (rol, fechas, equipo, herramientas de producción...), añádelos arriba o en los archivos de datos. -->
 
@@ -143,7 +144,9 @@ Near-black with an acid-green accent is currently one of the most common looks a
   - Home intro with my name (`Intro.astro`): once per session, about 2 s, skipped by any click, key, scroll or touch, never without JS or with reduced motion. The page is in the DOM underneath from the start and the timeline is pure CSS, so it can't get stuck.
   - Page `<h1>`s assemble letter by letter (`SplitText.astro`); screen readers get the whole text.
   - Hover feedback on mouse devices (`Effects.astro`): letters decode on nav links, buttons and project titles (`data-scramble`), a cursor ring trails the pointer (the system cursor always stays), and a light follows the pointer on project cards (`data-spotlight`).
-  - Native cross-document view transitions with a vertical wipe; the header stays put.
+  - Native cross-document view transitions with a vertical wipe; the header stays put. A project card's title and cover morph into the project page's (`transitionStyles()` in `src/lib/projects.ts`); names must stay unique per page.
+  - Contextual cursor: over `[data-cursor="View"]` (project cards) and `[data-cursor="Play"]` (videos) the ring fills and shows the label.
+  - 404 is a game-over screen with a "Continue?" countdown home (10 s) that "Stay here" stops.
   - Static film grain on the background and a scroll progress line under the header.
 - UI feedback 150–400 ms, ease-out; letter reveals up to ~800 ms. Image hover scale no more than 1.04.
 - `prefers-reduced-motion: reduce` removes movement (instant, or opacity only).
