@@ -1,0 +1,21 @@
+---
+// Content editor (Sveltia CMS) for Projects and Game Library. Not part of the public site:
+// no layout and not indexed. Saving writes Markdown files to src/content/ (on GitHub, or in
+// the local folder with "Work with Local Repository"). The config lives in public/ so it has
+// a fixed URL, which the <link> below points to.
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Admin — Jordi Bacardit</title>
+    <link href="/administrador/config.yml" type="application/yaml" rel="cms-config-url" />
+  </head>
+  <body>
+    <!-- Version pinned on purpose: update it after checking the Sveltia CMS release notes. -->
+    <script is:inline src="https://unpkg.com/@sveltia/cms@0.225.0/dist/sveltia-cms.js"></script>
+  </body>
+</html>

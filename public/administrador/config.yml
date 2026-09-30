@@ -1,17 +1,21 @@
-# Sveltia CMS: the Game Library editor at /administrador/.
-# Saving commits to GitHub, so only accounts with write access to the repo can change content.
-# Sign in with "Sign In with Token": a fine-grained personal access token limited to this
-# repository, with the "Contents: Read and write" permission.
-# Docs: https://sveltiacms.app/en/docs/backends/github
+# Sveltia CMS: the Game Library editor at /administrador (page: src/pages/administrador.astro).
+# Projects are not edited here: they live in src/content/projects/ as files.
+# Keep these fields in sync with the games schema in src/content.config.ts.
+#
+# Online: saving commits to GitHub, so only accounts with write access to the repo can change
+# content. Sign in with "Sign In with Token": a fine-grained personal access token limited to
+# this repository with the "Contents: Read and write" permission.
+# Local: open /administrador in Chrome or Edge and choose "Work with Local Repository".
+# Docs: https://sveltiacms.app/en/docs
 
 backend:
   name: github
   repo: jordi-bacardit/portfolio-jordibacardit
   branch: main
 
-# Screenshots go to src/assets/ so Astro can optimize them (resolved in src/lib/games.ts).
-media_folder: /src/assets/games
-public_folder: /src/assets/games
+# Images live in src/assets/ so Astro can optimize them.
+media_folder: /src/assets
+public_folder: /src/assets
 
 output:
   omit_empty_optional_fields: true
@@ -20,6 +24,7 @@ collections:
   - name: games
     label: Game Library
     label_singular: Game
+    description: Games on /game-library, grouped by status.
     folder: src/content/games
     extension: md
     format: frontmatter
@@ -27,6 +32,9 @@ collections:
     delete: true
     slug: '{{slug}}'
     identifier_field: title
+    sortable_fields: [title, status]
+    media_folder: /src/assets/games
+    public_folder: /src/assets/games
     fields:
       - name: title
         label: Title

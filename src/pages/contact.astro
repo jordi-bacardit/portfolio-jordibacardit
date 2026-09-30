@@ -2,6 +2,7 @@
 import Button from '../components/Button.astro';
 import Container from '../components/Container.astro';
 import Placeholder from '../components/Placeholder.astro';
+import SplitText from '../components/SplitText.astro';
 import { site } from '../data/site';
 import BaseLayout from '../layouts/BaseLayout.astro';
 
@@ -34,8 +35,8 @@ const channels = [
   <Container class="page">
     <div class="intro">
       <h1>
-        <span>Let's</span>{" "}
-        <span class="muted">connect.</span>
+        <span><SplitText text="Let's" /></span>{" "}
+        <span class="muted"><SplitText text="connect." start={5} /></span>
       </h1>
       <p class="lead">
         Open to internships, junior roles, networking and collaboration in game production and game

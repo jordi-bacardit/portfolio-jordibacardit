@@ -1,11 +1,13 @@
 ---
 import { getImage, Image, Picture } from 'astro:assets';
-import { render } from 'astro:content';
 import Button from '../../components/Button.astro';
 import Container from '../../components/Container.astro';
 import ProjectMeta from '../../components/ProjectMeta.astro';
+import SplitText from '../../components/SplitText.astro';
+import YouTubeVideo from '../../components/YouTubeVideo.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getProjects, type Project } from '../../lib/projects';
+import { getProjects, playLabel, type Project } from '../../lib/projects';
+import { paragraphs } from '../../lib/text';
 
 export async function getStaticPaths() {
   const projects = await getProjects();
@@ -22,42 +24,49 @@ interface Props {
 }
 
 const { project, prev, next } = Astro.props;
-const { title, summary, cover, coverAlt, gallery, links } = project.data;
-const { Content } = await render(project);
+const {
+  title,
+  summary,
+  cover,
+  coverAlt,
+  trailer,
+  trailerPoster,
+  gameplay,
+  gallery,
+  links,
+  overview,
+  responsibilities,
+  production,
+  highlights,
+} = project.data;
+
+// The same sections, in the same order, on every project; empty ones are hidden.
+const sections = [
+  { id: 'overview', title: 'Overview.', text: paragraphs(overview) },
+  { id: 'responsibilities', title: 'My role and responsibilities.', text: paragraphs(responsibilities) },
+  { id: 'production', title: 'Production.', text: paragraphs(production) },
+].filter((section) => section.text.length > 0);
+const bullets = (highlights ?? []).map((item) => item.trim()).filter(Boolean);
 
 const ogImage = cover ? (await getImage({ src: cover, width: 1200, format: 'jpg' })).src : undefined;
 
+// Every media section is optional and stays hidden until the entry has data for it.
+const play = links?.build ? { label: playLabel(links.build), href: links.build } : null;
 const actions = [
-  links?.build ? { label: 'Play the build', href: links.build } : null,
-  links?.video ? { label: 'Watch the video', href: links.video } : null,
+  play,
   links?.repo ? { label: 'View the source code', href: links.repo } : null,
 ].filter((action) => action !== null);
+const clips = gameplay ?? [];
+const shots = gallery ?? [];
 ---
 
 <BaseLayout title={title} description={summary} image={ogImage}>
   <article>
     <Container as="header" class="hero">
-      <h1>{title}</h1>
-      <p class="pitch">{summary}</p>
-    </Container>
-
-    {
-      cover && (
-        <Container class="cover">
-          <Picture
-            src={cover}
-            alt={coverAlt ?? ''}
-            formats={['avif', 'webp']}
-            widths={[640, 960, 1280, 1920, 2560]}
-            sizes="(min-width: 88rem) 88rem, 100vw"
-            loading="eager"
-            fetchpriority="high"
-          />
-        </Container>
-      )
-    }
-
-    <Container class="body">
+      <div class="heading">
+        <h1><SplitText text={title} /></h1>
+        <p class="pitch">{summary}</p>
+      </div>
       <aside class="details" aria-label="Project details">
         <ProjectMeta project={project.data} />
         {
@@ -72,32 +81,104 @@ const actions = [
           )
         }
       </aside>
-      <div class="prose">
-        <Content />
-      </div>
     </Container>
 
     {
-      gallery && gallery.length > 0 && (
-        <Container as="section" class="gallery" aria-labelledby="gallery-title">
-          <h2 id="gallery-title">Gallery</h2>
-          <ul role="list">
-            {gallery.map((item) => (
-              <li>
-                <Image
-                  src={item.image}
-                  alt={item.alt}
-                  widths={[640, 960, 1280]}
-                  sizes="(min-width: 48em) 50vw, 100vw"
-                />
-              </li>
-            ))}
-          </ul>
+      cover && (
+        <Container class="cover">
+          <Picture
+            src={cover}
+            alt={coverAlt ?? ''}
+            formats={['avif', 'webp']}
+            widths={[640, 960, 1280, 1920, 2560]}
+            sizes="(min-width: 90rem) 90rem, 100vw"
+            loading="eager"
+            fetchpriority="high"
+          />
+        </Container>
+      )
+    }
+
+    {
+      trailer && (
+        <Container as="section" class="media-section" aria-labelledby="trailer-title">
+          <h2 id="trailer-title">Trailer.</h2>
+          <YouTubeVideo url={trailer} title={`${title} trailer`} poster={trailerPoster ?? cover} />
+        </Container>
+      )
+    }
+
+    {
+      (sections.length > 0 || bullets.length > 0) && (
+        <Container class="body">
+          {sections.map((section) => (
+            <section class="text-section" aria-labelledby={`${section.id}-title`}>
+              <h2 id={`${section.id}-title`}>{section.title}</h2>
+              <div class="prose">
+                {section.text.map((paragraph) => (
+                  <p>{paragraph}</p>
+                ))}
+              </div>
+            </section>
+          ))}
+          {bullets.length > 0 && (
+            <section class="text-section" aria-labelledby="highlights-title">
+              <h2 id="highlights-title">Technical highlights.</h2>
+              <ul class="prose highlights">
+                {bullets.map((item) => (
+                  <li>{item}</li>
+                ))}
+              </ul>
+            </section>
+          )}
+        </Container>
+      )
+    }
+
+    {
+      (clips.length > 0 || shots.length > 0) && (
+        <Container as="section" class="media-section" aria-labelledby="gameplay-title">
+          <h2 id="gameplay-title">Gameplay.</h2>
+          {clips.length > 0 && (
+            <div class="grid">
+              {clips.map((clip) => (
+                <figure>
+                  <YouTubeVideo url={clip.video} title={clip.title} poster={clip.poster} />
+                  {clip.poster && <figcaption>{clip.title}</figcaption>}
+                </figure>
+              ))}
+            </div>
+          )}
+          {shots.length > 0 && (
+            <ul role="list" class="grid">
+              {shots.map((shot) => (
+                <li>
+                  <Image
+                    src={shot.image}
+                    alt={shot.alt}
+                    widths={[640, 960, 1280]}
+                    sizes="(min-width: 48em) 50vw, 100vw"
+                    class="shot"
+                  />
+                </li>
+              ))}
+            </ul>
+          )}
+        </Container>
+      )
+    }
+
+    {
+      play && (
+        <Container as="section" class="play" aria-labelledby="play-title">
+          <h2 id="play-title">Play it.</h2>
+          <Button href={play.href} variant="primary">
+            {play.label}
+          </Button>
         </Container>
       )
     }
   </article>
-
   {
     (prev || next) && (
       <Container as="nav" class="pager" aria-label="More projects">
@@ -121,30 +202,25 @@ const actions = [
 <style>
   .hero {
     display: grid;
-    gap: var(--space-l);
+    gap: var(--space-2xl);
     padding-block: var(--space-2xl);
+  }
+
+  .heading {
+    display: grid;
+    gap: var(--space-l);
   }
 
   .pitch {
     font-size: var(--text-lg);
   }
 
-  .cover :global(img) {
-    width: 100%;
-    max-height: 80svh;
-    object-fit: cover;
-  }
-
-  .body {
-    display: grid;
-    gap: var(--space-2xl);
-    padding-block: var(--space-2xl);
-  }
-
   .details {
     display: grid;
     gap: var(--space-xl);
     align-content: start;
+    padding-top: var(--space-l);
+    border-top: var(--border-thin) solid var(--color-line);
   }
 
   .actions {
@@ -153,41 +229,91 @@ const actions = [
     gap: var(--space-s);
   }
 
+  .cover :global(img) {
+    width: 100%;
+    max-height: 80svh;
+    object-fit: cover;
+    border: var(--border-thin) solid var(--color-line);
+  }
+
+  .body {
+    display: grid;
+    gap: var(--space-2xl);
+    padding-block: var(--space-2xl);
+  }
+
+  .text-section {
+    display: grid;
+    gap: var(--space-l);
+    padding-top: var(--space-l);
+    border-top: var(--border-thin) solid var(--color-line);
+  }
+
+  .text-section h2 {
+    font-size: var(--text-2xl);
+  }
+
   .prose {
     display: grid;
     gap: var(--space-m);
-    align-content: start;
+    max-width: 52rem;
+    font-size: var(--text-lg);
   }
 
-  .prose :global(h2) {
-    margin-top: var(--space-l);
-    font-size: var(--text-xl);
-  }
-
-  .prose :global(h2:first-child) {
-    margin-top: 0;
-  }
-
-  .prose :global(ul) {
-    display: grid;
+  .highlights {
     gap: var(--space-xs);
     max-width: var(--measure);
     padding-left: 1.25em;
   }
 
-  .prose :global(li::marker) {
-    color: var(--color-text-muted);
+  .highlights li::marker {
+    color: var(--color-accent);
   }
 
-  .gallery {
+  .media-section {
     display: grid;
     gap: var(--space-xl);
     padding-block: var(--space-2xl);
   }
 
-  .gallery ul {
+  .grid {
     display: grid;
+    gap: var(--space-l) var(--space-m);
+  }
+
+  figure {
+    display: grid;
+    gap: var(--space-s);
+  }
+
+  figcaption {
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+  }
+
+  .shot {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border: var(--border-thin) solid var(--color-line);
+  }
+
+  .play {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
     gap: var(--space-l);
+    margin-top: var(--space-2xl);
+    padding-block: var(--space-2xl);
+    border-block: var(--border-thin) solid var(--color-line);
+  }
+
+  .play h2 {
+    font-size: var(--text-3xl);
   }
 
   .pager {
@@ -198,22 +324,26 @@ const actions = [
 
   .pager a {
     display: grid;
-    gap: var(--space-2xs);
-    padding-block: var(--space-l);
+    gap: var(--space-xs);
+    padding-block: var(--space-xl);
     border-top: var(--border-thin) solid var(--color-line);
     text-decoration: none;
   }
 
   .direction {
     color: var(--color-text-muted);
-    font-size: var(--text-sm);
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
   }
 
   .pager-title {
     font-family: var(--font-display);
-    font-size: var(--text-xl);
-    font-weight: 800;
-    line-height: 1;
+    font-size: var(--text-2xl);
+    font-weight: 600;
+    letter-spacing: var(--tracking-display);
+    line-height: var(--leading-display);
     text-transform: uppercase;
     transition: color var(--duration-fast) var(--ease-out);
   }
@@ -223,7 +353,7 @@ const actions = [
   }
 
   @media (min-width: 48em) {
-    .gallery ul {
+    .grid {
       grid-template-columns: 1fr 1fr;
     }
 
@@ -238,13 +368,14 @@ const actions = [
   }
 
   @media (min-width: 64em) {
-    .body {
-      grid-template-columns: minmax(14rem, 1fr) 3fr;
+    .hero {
+      grid-template-columns: 2fr 1fr;
+      align-items: end;
     }
 
-    .details {
-      position: sticky;
-      top: var(--space-xl);
+    .text-section {
+      grid-template-columns: 1fr 2fr;
+      align-items: start;
     }
   }
 </style>

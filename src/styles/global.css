@@ -138,9 +138,36 @@ a:hover {
   border: 0;
 }
 
+/* Page transitions: the old page lifts away, the new one wipes in from the bottom.
+   The header has its own view-transition-name, so it stays put. */
 @media (prefers-reduced-motion: no-preference) {
   @view-transition {
     navigation: auto;
+  }
+
+  ::view-transition-old(root) {
+    animation: page-out 300ms var(--ease-out) both;
+  }
+
+  ::view-transition-new(root) {
+    animation: page-in 550ms var(--ease-out) both;
+  }
+}
+
+@keyframes page-out {
+  to {
+    opacity: 0;
+    transform: translateY(-2rem);
+  }
+}
+
+@keyframes page-in {
+  from {
+    clip-path: inset(100% 0 0 0);
+  }
+
+  to {
+    clip-path: inset(0 0 0 0);
   }
 }
 

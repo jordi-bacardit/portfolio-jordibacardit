@@ -4,6 +4,7 @@ import portrait from '../assets/jordi-portrait.png';
 import Button from '../components/Button.astro';
 import Container from '../components/Container.astro';
 import ProjectList from '../components/ProjectList.astro';
+import SplitText from '../components/SplitText.astro';
 import { site } from '../data/site';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getProjects } from '../lib/projects';
@@ -12,13 +13,15 @@ const projects = await getProjects();
 const [firstName, ...lastName] = site.name.split(' ');
 ---
 
-<BaseLayout description={site.description}>
+<BaseLayout description={site.description} intro>
   <Container as="section" class="hero" aria-labelledby="hero-title">
     <h1 id="hero-title" class="name">
-      <span class="line"><span>{firstName}</span></span>{" "}
-      <span class="line"><span>{lastName.join(' ')}.</span></span>
+      <span class="line"><SplitText text={firstName} variant="rise" /></span>{" "}
+      <span class="line"
+        ><SplitText text={`${lastName.join(' ')}.`} variant="rise" start={firstName.length} /></span
+      >
     </h1>
-    <div class="intro">
+    <div class="hero-text">
       <p class="role">{site.role}</p>
       <div class="details">
         <p class="study">
@@ -78,18 +81,15 @@ const [firstName, ...lastName] = site.name.split(' ');
   .line {
     display: block;
     overflow: hidden;
-    padding-bottom: 0.04em;
-  }
-
-  .line > span {
-    display: block;
+    padding-bottom: 0.1em;
+    margin-bottom: -0.06em;
   }
 
   .line + .line {
     color: var(--color-text-muted);
   }
 
-  .intro {
+  .hero-text {
     display: grid;
     gap: var(--space-l);
   }
@@ -133,24 +133,19 @@ const [firstName, ...lastName] = site.name.split(' ');
     margin-top: var(--space-xs);
   }
 
-  /* The page's one orchestrated moment: the name rises into place on load. */
+  /* The page's one orchestrated moment: the name rises letter by letter (SplitText), then the
+     text fades in. While the intro plays, both wait for its panels to open. */
   @media (prefers-reduced-motion: no-preference) {
-    .line > span {
-      animation: rise 700ms var(--ease-out) both;
+    .hero-text {
+      animation: fade var(--duration-slow) var(--ease-out) 450ms both;
     }
 
-    .line + .line > span {
-      animation-delay: 90ms;
+    :global(html.intro-play) .name {
+      --split-delay: 1450ms;
     }
 
-    .intro {
-      animation: fade var(--duration-slow) var(--ease-out) 300ms both;
-    }
-  }
-
-  @keyframes rise {
-    from {
-      transform: translateY(105%);
+    :global(html.intro-play) .hero-text {
+      animation-delay: 1900ms;
     }
   }
 
@@ -211,7 +206,7 @@ const [firstName, ...lastName] = site.name.split(' ');
   }
 
   @media (min-width: 64em) {
-    .intro {
+    .hero-text {
       grid-template-columns: 1fr 1fr;
       align-items: start;
     }

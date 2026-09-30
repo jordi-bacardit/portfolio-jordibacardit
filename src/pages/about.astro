@@ -4,6 +4,7 @@ import portrait from '../assets/jordi-portrait.png';
 import Button from '../components/Button.astro';
 import Container from '../components/Container.astro';
 import Placeholder from '../components/Placeholder.astro';
+import SplitText from '../components/SplitText.astro';
 import { site, technologies } from '../data/site';
 import BaseLayout from '../layouts/BaseLayout.astro';
 
@@ -16,7 +17,7 @@ const { study } = site;
 >
   <Container class="intro">
     <div class="copy">
-      <h1>Who I am.</h1>
+      <h1><SplitText text="Who I am." /></h1>
       <p class="lead">
         I'm {site.name}, a {study.degree} student at {study.school}, {study.country}.
       </p>

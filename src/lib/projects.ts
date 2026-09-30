@@ -22,6 +22,11 @@ export async function getProjects(): Promise<Project[]> {
   return projects.sort((a, b) => a.data.order - b.data.order);
 }
 
+/** Button label for a playable build: names itch.io when the link points there. */
+export function playLabel(url: string) {
+  return new URL(url).hostname.endsWith('itch.io') ? 'Play on itch.io' : 'Play the build';
+}
+
 /** The project marked `featured` (or the first one) plus the rest, in order. */
 export function splitFeatured(projects: Project[]) {
   const featured = projects.find((project) => project.data.featured) ?? projects[0];

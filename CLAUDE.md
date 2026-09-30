@@ -75,7 +75,7 @@ Confirmed facts:
 - Lost On The Gates: World War II tank survival game, Unity and C#. Confirmed: tank gameplay, enemy AI with NavMeshAgent, turret systems, HUD, kill counter, prefabs. Unknown: my role, solo or team, context, dates, links, media.
 - Unreal Engine gameplay prototype: an actor/trigger system; reaching the trigger restarts the level. Nothing else confirmed.
 - TFG (Final Degree Project): AI and video games, not built yet. Two candidate directions: "ArtScan AI" (not defined; don't describe it) and a small Unreal Engine RPG with AI-driven NPCs. Always labelled Upcoming / In development / TFG. No screenshots, features or results.
-- Still TODO: graduation year, email, LinkedIn URL, GitHub URL, CV file, logo file, domain.
+- Still TODO: graduation year, email, LinkedIn URL, GitHub URL, CV file, domain.
 
 <!-- Cuando confirmes datos (rol, fechas, equipo, herramientas de producción...), añádelos arriba o en los archivos de datos. -->
 
@@ -96,7 +96,8 @@ Confirmed facts:
 My positioning is production, so project pages must show production thinking, not only code.
 
 - Required fields: title, slug, one-line summary, status (prototype / in development / complete / upcoming).
-- Optional fields: cover image and alt, gallery, my role, engine, technologies, type (course / personal / jam / TFG), dates, team (solo, or size and disciplines), links (playable build, repo, video).
+- Optional fields: cover image and alt, trailer and gameplay clips (YouTube links, click-to-load via `YouTubeVideo.astro`, poster images are local), gallery, my role, engine, technologies, type (course / personal / jam / TFG), dates, team (solo, or size and disciplines), links (playable build, usually itch.io, and repo).
+- Projects are edited directly in their files (not in the CMS). Every project file carries the same full template: all fields present, empty ones hidden on the page. The four optional sections are frontmatter fields (`overview`, `responsibilities`, `production`, `highlights`) rendered with fixed headings, not a free Markdown body.
 - Optional sections: Overview; My role and responsibilities; Production (scope, planning, tools, what I cut and why, risks, what I'd do differently); Technical highlights.
 
 Index: one featured project shown large, the rest secondary, never a grid of identical cards. Artwork and screenshots dominate; a card carries the title plus two or three metadata values, nothing more. Detail page: large hero image, one-line pitch, metadata as a `<dl>` beside the content on desktop, sections below, previous/next project navigation.
@@ -105,8 +106,8 @@ Index: one featured project shown large, the rest secondary, never a grid of ide
 
 Shows how I think about games as a medium. Entry fields: title, platforms, genre, status (playing / played / favourite / formative), my note (why it matters to me), optional image (my own screenshots preferred). The layout can be more experimental than Work but uses the same tokens, type and components. Propose options before building it.
 
-- Entries live in `src/content/games/` (one Markdown file each) and I add them through Sveltia CMS at `/administrador/` (`public/administrador/`). It commits to GitHub, so only accounts with write access to the repo can save. The site stays static.
-- Screenshots go to `src/assets/games/`; `src/lib/games.ts` resolves the CMS paths to optimizable images. Keep the CMS config and the collection schema in sync.
+- Entries live in `src/content/games/` (one Markdown file each) and I add, edit and delete them through Sveltia CMS at `/administrador` (page `src/pages/administrador.astro`, config `public/administrador/config.yml`). It commits to GitHub, so only accounts with write access to the repo can save. The site stays static.
+- The CMS uploads images to `src/assets/projects/` and `src/assets/games/` and writes `/src/assets/...` paths, which `image()` resolves. Keep the CMS config and the collection schemas in `src/content.config.ts` in sync.
 
 ## Copy
 
@@ -125,18 +126,25 @@ Direction: dark, cinematic, editorial. Closer to a game studio's site or a game'
 - The accent is a signature, used small: active nav, focus rings, hover states, the key CTA, thin indicators. Never large fills, section backgrounds or running text.
 - Text on an accent background always uses the dark background color (white on `#d8ff00` fails contrast).
 - Two type roles: a strong, compact display face for large headings and a highly readable body face. If fonts aren't set yet, propose two or three pairings first; avoid the usual defaults (Inter, Roboto, Poppins, Montserrat, Space Grotesk).
+- Chosen: Familjen Grotesk (headings and body) + JetBrains Mono only for small labels (metadata `<dt>`, buttons, header role/status). The look follows my previous site `jordi_portfolio_v9` (Desktop): huge tight uppercase headings ending in a period, featured card plus stacked cards, large portrait on About. Its copy is not confirmed content.
 - Body text 16–18px, line-height around 1.5, lines under ~75 characters. Headings scale fluidly with `clamp()`.
 - Layout: a strong grid, generous spacing, large imagery. Vary compositions between sections (featured plus secondary, full-bleed image, split screen, big type) instead of repeating one row of cards. Spend boldness on one element per page and keep the rest quiet.
-- Logo: already exists (file: TODO). Use it in the header next to the name, in the footer and as the favicon. Never redesign or approximate it; if the file is missing, leave a placeholder and tell me.
+- Logo: `src/assets/logo.png` (transparent PNG with a glow; `Logo.astro` shows it as a square crop). Use it in the header next to the name, in the footer and as the favicon (`public/favicon.ico`, `icon-192.png`, `apple-touch-icon.png`, generated from the logo). Never redesign or approximate it.
 
 Near-black with an acid-green accent is currently one of the most common looks among templates and AI-generated sites, so color alone won't make this memorable. Distinctiveness has to come from my own game material, the logo and the typography, and from not stacking template habits on top. Each of these needs a real reason before it appears: identical rounded cards with soft shadows; gradients or glassmorphism; all-caps eyebrow labels above headings; 01/02/03 numbering on things that aren't a sequence; metadata joined with middle dots; "→" on every link; monospace for every small label; borders and dividers that don't separate anything meaningful.
 
 ## Motion
 
-- At most one orchestrated moment per page (for example the hero on load), plus motion that answers the user: hover, focus, the menu, page transitions. No fade-up on every section.
-- 150–400 ms, ease-out. Image hover scale no more than 1.04.
+- At most one orchestrated moment per page, plus motion that answers the user: hover, focus, the menu, page transitions. No fade-up on every section.
+- Approved motion (2026-09-30):
+  - Home intro with my name (`Intro.astro`): once per session, about 2 s, skipped by any click, key, scroll or touch, never without JS or with reduced motion. The page is in the DOM underneath from the start and the timeline is pure CSS, so it can't get stuck.
+  - Page `<h1>`s assemble letter by letter (`SplitText.astro`); screen readers get the whole text.
+  - Hover feedback on mouse devices (`Effects.astro`): letters decode on nav links, buttons and project titles (`data-scramble`), a cursor ring trails the pointer (the system cursor always stays), and a light follows the pointer on project cards (`data-spotlight`).
+  - Native cross-document view transitions with a vertical wipe; the header stays put.
+  - Static film grain on the background and a scroll progress line under the header.
+- UI feedback 150–400 ms, ease-out; letter reveals up to ~800 ms. Image hover scale no more than 1.04.
 - `prefers-reduced-motion: reduce` removes movement (instant, or opacity only).
-- No custom cursors, scroll-jacking, or intro/loading screens that delay content.
+- No scroll-jacking, no replacing the system cursor, no loading screens that block content.
 
 ## Responsive and accessibility: hard constraints
 

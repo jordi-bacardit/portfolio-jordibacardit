@@ -37,7 +37,7 @@ function current(href: string) {
         {
           nav.map((item) => (
             <li>
-              <a href={item.href} aria-current={current(item.href)}>
+              <a href={item.href} aria-current={current(item.href)} data-scramble>
                 {item.label}
               </a>
             </li>
@@ -47,6 +47,7 @@ function current(href: string) {
     </nav>
     <p class="status"><span class="dot" aria-hidden="true"></span>{site.status}</p>
   </div>
+  <span class="progress" aria-hidden="true"></span>
 </header>
 
 <script>
@@ -203,6 +204,33 @@ function current(href: string) {
     left: 0;
     height: var(--border-strong);
     background: var(--color-accent);
+  }
+
+  /* Scroll progress: a CSS scroll-driven animation, so browsers without support simply don't show it. */
+  .progress {
+    position: absolute;
+    right: 0;
+    bottom: -1px;
+    left: 0;
+    height: var(--border-strong);
+    background: var(--color-accent);
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+  }
+
+  @supports (animation-timeline: scroll()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .progress {
+        animation: scroll-progress linear both;
+        animation-timeline: scroll(root);
+      }
+    }
+  }
+
+  @keyframes scroll-progress {
+    to {
+      transform: scaleX(1);
+    }
   }
 
   /* Without JS the links stay visible as a wrapping row; the toggle only exists with JS. */

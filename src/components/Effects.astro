@@ -1,0 +1,181 @@
+---
+// Site-wide ambience and pointer feedback, all decorative and opt-in by data attributes:
+// - film grain behind the content;
+// - a cursor ring that trails the pointer (the system cursor stays) on mouse devices;
+// - [data-scramble]: letters decode on hover/focus;
+// - [data-spotlight]: sets --spot-x/--spot-y so the element can draw a light under the pointer.
+// Movement is skipped with prefers-reduced-motion; pointer effects only run with a mouse.
+---
+
+<div class="grain" aria-hidden="true"></div>
+<div class="cursor" aria-hidden="true" data-cursor-ring><span class="ring"></span></div>
+
+<script>
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const mouse = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+  function initCursor() {
+    const cursor = document.querySelector<HTMLElement>('[data-cursor-ring]');
+    if (!cursor) return;
+    let x = -100;
+    let y = -100;
+    let targetX = x;
+    let targetY = y;
+    let frame = 0;
+
+    const follow = () => {
+      x += (targetX - x) * 0.2;
+      y += (targetY - y) * 0.2;
+      cursor.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+      frame = Math.abs(targetX - x) + Math.abs(targetY - y) > 0.1 ? requestAnimationFrame(follow) : 0;
+    };
+
+    window.addEventListener(
+      'pointermove',
+      (event) => {
+        if (event.pointerType !== 'mouse') return;
+        targetX = event.clientX;
+        targetY = event.clientY;
+        cursor.classList.add('is-visible');
+        if (!frame) frame = requestAnimationFrame(follow);
+      },
+      { passive: true },
+    );
+    document.documentElement.addEventListener('pointerleave', () => {
+      cursor.classList.remove('is-visible');
+    });
+    document.addEventListener('pointerover', (event) => {
+      const target = event.target as Element | null;
+      cursor.classList.toggle('is-active', Boolean(target?.closest('a, button, [data-cursor]')));
+    });
+  }
+
+  const glyphs = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#/_';
+
+  // Splits the element's text into fixed-width letters once; the element keeps its name via aria-label.
+  function letters(element: HTMLElement): HTMLElement[] {
+    if (!element.dataset.scrambleReady) {
+      const text = (element.textContent ?? '').trim().replace(/\s+/g, ' ');
+      element.setAttribute('aria-label', text);
+      element.textContent = '';
+      text.split(' ').forEach((word, index) => {
+        if (index > 0) element.append(' ');
+        const wordEl = document.createElement('span');
+        wordEl.className = 'scramble-word';
+        wordEl.setAttribute('aria-hidden', 'true');
+        for (const char of word) {
+          const charEl = document.createElement('span');
+          charEl.className = 'scramble-char';
+          charEl.dataset.char = char;
+          charEl.textContent = char;
+          wordEl.append(charEl);
+        }
+        element.append(wordEl);
+      });
+      element.dataset.scrambleReady = 'true';
+    }
+    return [...element.querySelectorAll<HTMLElement>('.scramble-char')];
+  }
+
+  function initScramble() {
+    document.querySelectorAll<HTMLElement>('[data-scramble]').forEach((element) => {
+      let frame = 0;
+      const play = () => {
+        if (frame) return;
+        const chars = letters(element);
+        chars.forEach((char) => (char.style.width = `${char.getBoundingClientRect().width}px`));
+        const startTime = performance.now();
+        const duration = 420;
+        const tick = (now: number) => {
+          const progress = Math.min((now - startTime) / duration, 1);
+          chars.forEach((char, index) => {
+            const settled = progress >= (index + 1) / chars.length;
+            char.textContent = settled
+              ? (char.dataset.char ?? '')
+              : glyphs[Math.floor(Math.random() * glyphs.length)];
+          });
+          if (progress < 1) {
+            frame = requestAnimationFrame(tick);
+          } else {
+            frame = 0;
+            chars.forEach((char) => (char.style.width = ''));
+          }
+        };
+        frame = requestAnimationFrame(tick);
+      };
+      element.addEventListener('mouseenter', play);
+      element.addEventListener('focus', play);
+    });
+  }
+
+  function initSpotlight() {
+    document.querySelectorAll<HTMLElement>('[data-spotlight]').forEach((element) => {
+      element.addEventListener('pointermove', (event) => {
+        const box = element.getBoundingClientRect();
+        element.style.setProperty('--spot-x', `${event.clientX - box.left}px`);
+        element.style.setProperty('--spot-y', `${event.clientY - box.top}px`);
+      });
+    });
+  }
+
+  if (mouse) {
+    initSpotlight();
+    if (!reduceMotion) {
+      initCursor();
+      initScramble();
+    }
+  }
+</script>
+
+<style>
+  .grain {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.06;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 180px;
+  }
+
+  .cursor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1001;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity var(--duration-base) var(--ease-out);
+  }
+
+  .cursor.is-visible {
+    opacity: 1;
+  }
+
+  .ring {
+    display: block;
+    width: 2rem;
+    height: 2rem;
+    margin: -1rem 0 0 -1rem;
+    border: var(--border-thin) solid var(--color-accent);
+    border-radius: 50%;
+    transition:
+      transform var(--duration-base) var(--ease-out),
+      background-color var(--duration-base) var(--ease-out);
+  }
+
+  .cursor.is-active .ring {
+    background: var(--color-accent-glow);
+    transform: scale(1.8);
+  }
+
+  :global(.scramble-word) {
+    display: inline-block;
+    white-space: nowrap;
+  }
+
+  :global(.scramble-char) {
+    display: inline-block;
+    text-align: center;
+  }
+</style>

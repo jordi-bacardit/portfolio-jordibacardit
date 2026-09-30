@@ -1,7 +1,9 @@
 ---
 import { Font } from 'astro:assets';
+import Effects from '../components/Effects.astro';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
+import Intro from '../components/Intro.astro';
 import { site } from '../data/site';
 import '../styles/tokens.css';
 import '../styles/global.css';
@@ -12,9 +14,11 @@ interface Props {
   description: string;
   /** Root-relative or absolute URL of the Open Graph image. */
   image?: string;
+  /** Play the name intro (once per session). Home page only. */
+  intro?: boolean;
 }
 
-const { title, description, image } = Astro.props;
+const { title, description, image, intro = false } = Astro.props;
 
 const fullTitle = title ? `${title} — ${site.name}` : `${site.name} — ${site.role}`;
 const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : undefined;
@@ -30,12 +34,28 @@ const ogImage = image && Astro.site ? new URL(image, Astro.site).href : undefine
     <script is:inline>
       document.documentElement.classList.replace('no-js', 'js');
     </script>
+    {
+      intro && (
+        <script is:inline>
+          try {
+            if (
+              !matchMedia('(prefers-reduced-motion: reduce)').matches &&
+              !sessionStorage.getItem('intro-seen')
+            ) {
+              sessionStorage.setItem('intro-seen', '1');
+              document.documentElement.classList.add('intro-play');
+            }
+          } catch (error) {}
+        </script>
+      )
+    }
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     {canonical && <link rel="canonical" href={canonical} />}
-    <!-- TODO(content): replace public/favicon.svg and favicon.ico (Astro defaults) with the logo. -->
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <!-- Favicons generated from src/assets/logo.png. -->
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" type="image/png" href="/icon-192.png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content={site.name} />
     <meta property="og:title" content={fullTitle} />
@@ -50,12 +70,14 @@ const ogImage = image && Astro.site ? new URL(image, Astro.site).href : undefine
     <Font cssVariable="--font-jetbrains-mono" />
   </head>
   <body>
+    {intro && <Intro />}
     <a class="skip-link" href="#main">Skip to content</a>
     <Header />
     <main id="main">
       <slot />
     </main>
     <Footer />
+    <Effects />
   </body>
 </html>
 

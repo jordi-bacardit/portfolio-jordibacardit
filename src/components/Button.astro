@@ -10,7 +10,7 @@ interface Props extends HTMLAttributes<'a'> {
 const { href, variant = 'secondary', class: className, ...rest } = Astro.props;
 ---
 
-<a class:list={['button', variant, className]} href={href} {...rest}><slot /></a>
+<a class:list={['button', variant, className]} href={href} data-scramble {...rest}><slot /></a>
 
 <style>
   .button {

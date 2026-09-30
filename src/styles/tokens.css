@@ -11,6 +11,8 @@
   --color-line: #262b34;
   --color-accent: #d8ff00;
   --color-on-accent: #0a0c10;
+  /* Accent light for hover glows (cursor ring, card spotlight). */
+  --color-accent-glow: rgb(216 255 0 / 0.1);
   /* Darkens artwork behind card text so it stays readable (WCAG AA). */
   --color-scrim: rgb(10 12 16 / 0.85);
 
@@ -28,7 +30,7 @@
   --text-xl: clamp(1.5rem, 1.25rem + 1vw, 2rem);
   --text-2xl: clamp(2.25rem, 1.5rem + 3.2vw, 4.5rem);
   --text-3xl: clamp(3rem, 1rem + 8vw, 8.5rem);
-  --text-hero: clamp(3.25rem, 17vw, 17rem);
+  --text-hero: clamp(3.25rem, 19vw, 17rem);
 
   --leading-display: 0.82;
   --leading-body: 1.55;

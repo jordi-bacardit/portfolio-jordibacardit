@@ -1,0 +1,71 @@
+---
+// Renders text as individually animated letters, split at build time (no JS needed).
+// Screen readers get the whole text from the visually hidden copy; the letters are aria-hidden.
+// "fade" letters drift in with a blur; "rise" letters slide up and need a clipping parent.
+// A parent can delay the sequence by setting --split-delay.
+interface Props {
+  text: string;
+  variant?: 'fade' | 'rise';
+  /** Index of the first letter, to continue a stagger across several SplitTexts. */
+  start?: number;
+}
+
+const { text, variant = 'fade', start = 0 } = Astro.props;
+
+let index = start;
+const words = text.split(' ').map((word) => [...word].map((char) => ({ char, i: index++ })));
+---
+
+<span class="visually-hidden">{text}</span><span class:list={['split', variant]} aria-hidden="true">
+  {
+    words.map((letters, w) => (
+      <>
+        {w > 0 && ' '}
+        <span class="word">
+          {letters.map(({ char, i }) => (
+            <span class="char" style={`--i: ${i}`}>
+              {char}
+            </span>
+          ))}
+        </span>
+      </>
+    ))
+  }
+</span>
+
+<style>
+  .word {
+    display: inline-block;
+    white-space: nowrap;
+  }
+
+  .char {
+    display: inline-block;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .fade .char {
+      animation: split-fade 700ms var(--ease-out) both;
+      animation-delay: calc(var(--split-delay, 0ms) + var(--i) * 28ms);
+    }
+
+    .rise .char {
+      animation: split-rise 800ms var(--ease-out) both;
+      animation-delay: calc(var(--split-delay, 0ms) + var(--i) * 40ms);
+    }
+  }
+
+  @keyframes split-fade {
+    from {
+      opacity: 0;
+      filter: blur(8px);
+      transform: translateY(0.3em);
+    }
+  }
+
+  @keyframes split-rise {
+    from {
+      transform: translateY(110%);
+    }
+  }
+</style>

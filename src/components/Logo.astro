@@ -12,12 +12,22 @@ const { size = 40 } = Astro.props;
 const files = import.meta.glob<{ default: ImageMetadata }>('/src/assets/logo.{svg,png,webp}', {
   eager: true,
 });
+// Shown as a square crop (fit="cover"): the file has wide empty margins at the sides of the mark.
 const logo = Object.values(files)[0]?.default;
 ---
 
 {
   logo ? (
-    <Image src={logo} alt="" height={size} class="logo" loading="eager" />
+    <Image
+      src={logo}
+      alt=""
+      width={size}
+      height={size}
+      fit="cover"
+      densities={[1, 2]}
+      class="logo"
+      loading="eager"
+    />
   ) : (
     <span class="logo placeholder" style={`--logo-size: ${size}px`} aria-hidden="true">
       Logo
@@ -28,7 +38,6 @@ const logo = Object.values(files)[0]?.default;
 <style>
   .logo {
     flex-shrink: 0;
-    width: auto;
   }
 
   .placeholder {
