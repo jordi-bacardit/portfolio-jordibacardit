@@ -1,0 +1,50 @@
+---
+// Small status label: an accent dot plus a mono label ("Case study in progress" on projects).
+// `live` makes the dot pulse gently, for things that are still being worked on.
+import type { HTMLAttributes } from 'astro/types';
+
+interface Props extends HTMLAttributes<'span'> {
+  live?: boolean;
+}
+
+const { live = false, class: className, ...rest } = Astro.props;
+---
+
+<span class:list={['badge', { live }, className]} {...rest}
+  ><span class="dot" aria-hidden="true"></span><slot /></span
+>
+
+<style>
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-2xs) var(--space-s);
+    background: var(--color-scrim);
+    color: var(--color-text);
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-label);
+    line-height: 1.4;
+    text-transform: uppercase;
+  }
+
+  .dot {
+    flex-shrink: 0;
+    width: 0.5rem;
+    height: 0.5rem;
+    background: var(--color-accent);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .live .dot {
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+  }
+
+  @keyframes pulse {
+    50% {
+      opacity: 0.25;
+    }
+  }
+</style>

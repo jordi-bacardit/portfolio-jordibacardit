@@ -1,0 +1,101 @@
+---
+// A plain or grouped list (technical highlights, technologies). A plain list renders as one list;
+// groups render as category label plus items.
+// - "columns": groups side by side, items stacked with accent markers (highlights).
+// - "rows": one row per group, items inline (technologies), like the Tools list on About.
+import type { Category } from '../lib/projects';
+
+interface Props {
+  groups: Category[];
+  variant?: 'columns' | 'rows';
+}
+
+const { groups, variant = 'columns' } = Astro.props;
+const grouped = groups.some((group) => group.category);
+---
+
+{
+  grouped ? (
+    <dl class:list={['groups', variant]}>
+      {groups.map((group) => (
+        <div class="group">
+          <dt>{group.category}</dt>
+          <dd>
+            <ul role="list" class="items">
+              {group.items.map((item) => (
+                <li>{item}</li>
+              ))}
+            </ul>
+          </dd>
+        </div>
+      ))}
+    </dl>
+  ) : (
+    <ul role="list" class:list={['items', 'plain', variant]}>
+      {groups.flatMap((group) => group.items).map((item) => (
+        <li>{item}</li>
+      ))}
+    </ul>
+  )
+}
+
+<style>
+  .groups {
+    display: grid;
+    gap: var(--space-l) var(--space-xl);
+  }
+
+  .group {
+    display: grid;
+    gap: var(--space-s);
+    align-content: start;
+  }
+
+  .items {
+    display: grid;
+    gap: var(--space-xs);
+    font-size: var(--text-lg);
+  }
+
+  /* Columns: groups side by side; items stacked, each with a small accent marker. */
+  .columns.groups {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+  }
+
+  .columns .items li,
+  .columns.items li {
+    position: relative;
+    padding-left: 1.1em;
+  }
+
+  .columns .items li::before,
+  .columns.items li::before {
+    content: '';
+    position: absolute;
+    top: 0.62em;
+    left: 0;
+    width: 0.4em;
+    height: 0.4em;
+    background: var(--color-accent);
+  }
+
+  /* Rows: a label column and inline items, separated by a line between groups. */
+  .rows .group {
+    padding-block: var(--space-m);
+    border-top: var(--border-thin) solid var(--color-line);
+  }
+
+  .rows .items,
+  .rows.items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs) var(--space-l);
+  }
+
+  @media (min-width: 48em) {
+    .rows .group {
+      grid-template-columns: 11rem 1fr;
+      align-items: baseline;
+    }
+  }
+</style>

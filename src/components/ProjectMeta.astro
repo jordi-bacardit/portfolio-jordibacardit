@@ -1,8 +1,10 @@
 ---
-// Project metadata as a <dl>. "compact" shows at most three values (cards);
-// "full" shows every known value (detail page). Status is required and falls back to a placeholder.
-import Placeholder from './Placeholder.astro';
-import { statusLabels, typeLabels, type Project } from '../lib/projects';
+// Project metadata as a <dl>. Only known values are shown: a missing field is hidden, never
+// replaced by a placeholder.
+// - "compact" (cards): at most three values.
+// - "full" (project hero): the key facts a recruiter scans first. Technologies have their own
+//   section on the page, so they're not repeated here.
+import { flatItems, statusLabels, typeLabels, type Project } from '../lib/projects';
 
 interface Props {
   project: Project['data'];
@@ -11,29 +13,46 @@ interface Props {
 
 const { project, variant = 'full' } = Astro.props;
 
-const items = [
-  { label: 'Status', value: project.status && statusLabels[project.status], required: true },
-  { label: 'Type', value: project.type && typeLabels[project.type] },
-  { label: 'Engine', value: project.engine },
-  { label: 'Technologies', value: project.technologies?.join(', ') },
-  { label: 'My role', value: project.role },
-  { label: 'Team', value: project.team },
-  { label: 'Dates', value: project.dates },
-].filter((item) => item.value || item.required);
+const status = project.status && statusLabels[project.status];
+const type = project.type && typeLabels[project.type];
+
+const items = (
+  variant === 'full'
+    ? [
+        { label: 'Status', value: status },
+        { label: 'Year', value: project.year?.toString() },
+        { label: 'Dates', value: project.year ? undefined : project.dates },
+        { label: 'My role', value: project.role },
+        { label: 'Team', value: project.team },
+        { label: 'Engine', value: project.engine },
+        { label: 'Type', value: type },
+      ]
+    : [
+        { label: 'Status', value: status },
+        { label: 'Type', value: type },
+        { label: 'Engine', value: project.engine },
+        { label: 'Technologies', value: flatItems(project.technologies).join(', ') },
+        { label: 'My role', value: project.role },
+        { label: 'Team', value: project.team },
+        { label: 'Dates', value: project.dates },
+      ]
+).filter((item) => item.value);
 
 const shown = variant === 'compact' ? items.slice(0, 3) : items;
 ---
 
-<dl class:list={['meta', variant]}>
-  {
-    shown.map((item) => (
-      <div class="item">
-        <dt>{item.label}</dt>
-        <dd>{item.value ?? <Placeholder label={item.label.toLowerCase()} />}</dd>
-      </div>
-    ))
-  }
-</dl>
+{
+  shown.length > 0 && (
+    <dl class:list={['meta', variant]}>
+      {shown.map((item) => (
+        <div class="item">
+          <dt>{item.label}</dt>
+          <dd>{item.value}</dd>
+        </div>
+      ))}
+    </dl>
+  )
+}
 
 <style>
   .meta {
@@ -45,8 +64,10 @@ const shown = variant === 'compact' ? items.slice(0, 3) : items;
     grid-template-columns: repeat(auto-fit, minmax(7.5rem, max-content));
   }
 
+  /* Two columns even on small phones, so the hero facts stay short. */
   .full {
-    grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+    column-gap: var(--space-l);
   }
 
   .item {

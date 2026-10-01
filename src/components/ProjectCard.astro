@@ -2,8 +2,9 @@
 // A project card: artwork fills it when a cover exists; otherwise the title carries it.
 // Carries the title plus up to three metadata values (and the pitch when large).
 import { Picture } from 'astro:assets';
+import Badge from './Badge.astro';
 import ProjectMeta from './ProjectMeta.astro';
-import { transitionStyles, type Project } from '../lib/projects';
+import { caseStudyInProgress, transitionStyles, type Project } from '../lib/projects';
 
 interface Props {
   project: Project;
@@ -17,6 +18,7 @@ const { project, size = 'small', headingLevel = 2, eager = false } = Astro.props
 const { title, summary, cover } = project.data;
 const Heading = `h${headingLevel}` as 'h2' | 'h3';
 const morph = transitionStyles(project.id);
+const inProgress = caseStudyInProgress(project.data);
 ---
 
 <article class:list={['card', size, { 'has-cover': cover }]} data-spotlight data-cursor="View">
@@ -35,6 +37,7 @@ const morph = transitionStyles(project.id);
       />
     )
   }
+  {inProgress && <Badge live class="wip">Case study in progress</Badge>}
   <div class="info">
     <Heading class="title" style={morph.title}>
       <a href={`/work/${project.id}`} data-scramble>{title}</a>
@@ -95,6 +98,20 @@ const morph = transitionStyles(project.id);
 
   .card:hover::before {
     opacity: 1;
+  }
+
+  /* Room at the top so the label never sits on the title, however short the card. */
+  .card:has(> .wip) {
+    padding-top: 3rem;
+  }
+
+  /* Above the artwork, but clicks go through to the card link. */
+  .wip {
+    position: absolute;
+    top: var(--space-m);
+    left: var(--space-m);
+    z-index: 2;
+    pointer-events: none;
   }
 
   .info {

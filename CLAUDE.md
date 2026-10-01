@@ -65,7 +65,7 @@ This is an Astro project: follow the major version in `package.json` (current re
 Recruiters check details. One invented fact (a studio, a job, a team size, a date, a feature, a result, a player count) discredits the whole portfolio.
 
 - Use only the facts below and content already in the repo. Anything missing becomes `TODO(content): <what's needed>` in the data file.
-- On the page, optional fields and sections without data are hidden, never padded. Required ones render as a visible bracketed placeholder (`[TODO: role]`) that can't pass for real copy.
+- On the page, fields and sections without data are hidden: never padded and never shown as a public placeholder (changed 2026-10-01, no `[TODO]` on the live site). What's missing stays as a `TODO(content)` note in the data file.
 - You can draft copy (About, project summaries) from confirmed facts for my review. You can't invent opinions, motivations or anecdotes in my voice. Game Library picks and notes come only from me.
 - Don't upgrade facts: a prototype stays a prototype, a course project isn't "shipped", having used a tool isn't expertise. Show technologies as a plain list: no skill bars, percentages or levels.
 
@@ -97,10 +97,11 @@ Confirmed facts:
 
 My positioning is production, so project pages must show production thinking, not only code.
 
-- Required fields: title, slug, one-line summary, status (prototype / in development / complete / upcoming).
-- Optional fields: cover image and alt, trailer and gameplay clips (YouTube links, click-to-load via `YouTubeVideo.astro`, poster images are local), gallery, my role, engine, technologies, type (course / personal / jam / TFG), dates, team (solo, or size and disciplines), links (playable build, usually itch.io, and repo).
-- Projects are edited directly in their files (not in the CMS). Every project file carries the same full template: all fields present, empty ones hidden on the page. The four optional sections are frontmatter fields (`overview`, `responsibilities`, `production`, `highlights`) rendered with fixed headings, not a free Markdown body.
-- Optional sections: Overview; My role and responsibilities; Production (scope, planning, tools, what I cut and why, risks, what I'd do differently); Technical highlights.
+- Required fields: title, slug (file name), one-line summary, order. Status (prototype / in-development / complete → "Completed" / archived / upcoming) is expected but hidden while unknown.
+- Optional fields: year, role, team (solo, or size and disciplines), engine, type (course / personal / jam / TFG), dates (shown only without a year), technologies (plain list or `{ category, items }` groups), cover image and alt, trailer and gameplay clips (YouTube links, click-to-load via `YouTubeVideo.astro`, poster images are local), gallery (images or GIFs; GIFs are served unconverted to keep the animation), links (`build` usually itch.io, `steam`, `download`, `repo`, and `other` as label + url).
+- Projects are edited directly in their files (not in the CMS). Every project file carries the same full template: all fields present, empty ones hidden on the page. Sections are frontmatter fields rendered with fixed headings by the one shared template `src/pages/work/[slug].astro`, not a free Markdown body.
+- Page order: hero (title, summary, key facts in `ProjectMeta`, main links) → main visual (trailer if any, else cover) → Overview → My role (`responsibilities`: list or text, with role and team) → Development (`development[]`: title + description, any number) → Production (scope, planning, tools, what I cut and why, risks, what I'd do differently) → Challenges & solutions (`challenges[]`: title, challenge, solution) → Technical highlights (`highlights`: list or groups) → Technologies → Gameplay (extra clips, screenshots, GIFs) → Result → Links → previous/next.
+- A built project missing media or write-up shows a "Case study in progress" badge (`caseStudyInProgress()` in `src/lib/projects.ts`); it disappears once filled.
 
 Index: one featured project shown large, the rest secondary, never a grid of identical cards. Artwork and screenshots dominate; a card carries the title plus two or three metadata values, nothing more. Detail page: large hero image, one-line pitch, metadata as a `<dl>` beside the content on desktop, sections below, previous/next project navigation.
 

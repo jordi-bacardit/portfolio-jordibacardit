@@ -1,11 +1,22 @@
 ---
+// The one template every project page uses. Each section only renders when the project's file
+// has data for it, so projects with few fields stay short and never show empty headings.
 import { getImage, Image, Picture } from 'astro:assets';
+import Badge from '../../components/Badge.astro';
 import Button from '../../components/Button.astro';
+import CategoryList from '../../components/CategoryList.astro';
 import Container from '../../components/Container.astro';
 import ProjectMeta from '../../components/ProjectMeta.astro';
 import YouTubeVideo from '../../components/YouTubeVideo.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getProjects, playLabel, transitionStyles, type Project } from '../../lib/projects';
+import {
+  caseStudyInProgress,
+  getProjects,
+  projectLinks,
+  toCategories,
+  transitionStyles,
+  type Project,
+} from '../../lib/projects';
 import { paragraphs } from '../../lib/text';
 
 export async function getStaticPaths() {
@@ -26,6 +37,8 @@ const { project, prev, next } = Astro.props;
 const {
   title,
   summary,
+  role,
+  team,
   cover,
   coverAlt,
   trailer,
@@ -35,48 +48,79 @@ const {
   links,
   overview,
   responsibilities,
+  development,
   production,
+  challenges,
   highlights,
+  technologies,
+  result,
 } = project.data;
 
 // The card's title and cover morph into these (see transitionStyles).
 const morph = transitionStyles(project.id);
-
-// The same sections, in the same order, on every project; empty ones are hidden.
-const sections = [
-  { id: 'overview', title: 'Overview.', text: paragraphs(overview) },
-  { id: 'responsibilities', title: 'My role and responsibilities.', text: paragraphs(responsibilities) },
-  { id: 'production', title: 'Production.', text: paragraphs(production) },
-].filter((section) => section.text.length > 0);
-const bullets = (highlights ?? []).map((item) => item.trim()).filter(Boolean);
-
+const inProgress = caseStudyInProgress(project.data);
 const ogImage = cover ? (await getImage({ src: cover, width: 1200, format: 'jpg' })).src : undefined;
 
-// Every media section is optional and stays hidden until the entry has data for it.
-const play = links?.build ? { label: playLabel(links.build), href: links.build } : null;
-const actions = [
-  play,
-  links?.repo ? { label: 'View the source code', href: links.repo } : null,
-].filter((action) => action !== null);
+// Normalised content: blank entries dropped so a section only shows when there's something in it.
+const overviewText = paragraphs(overview);
+const responsibilityList = Array.isArray(responsibilities)
+  ? responsibilities.map((item) => item.trim()).filter(Boolean)
+  : [];
+const responsibilityText = Array.isArray(responsibilities) ? [] : paragraphs(responsibilities);
+const hasResponsibilities = responsibilityList.length > 0 || responsibilityText.length > 0;
+const developmentItems = (development ?? [])
+  .map((item) => ({ title: item.title.trim(), text: paragraphs(item.description) }))
+  .filter((item) => item.title && item.text.length > 0);
+const productionText = paragraphs(production);
+const challengeItems = (challenges ?? [])
+  .map((item) => ({
+    title: item.title.trim(),
+    challenge: paragraphs(item.challenge),
+    solution: paragraphs(item.solution),
+  }))
+  .filter((item) => item.title && (item.challenge.length > 0 || item.solution.length > 0));
+const highlightGroups = toCategories(highlights);
+const technologyGroups = toCategories(technologies);
+const resultText = paragraphs(result);
 const clips = gameplay ?? [];
 const shots = gallery ?? [];
+const allLinks = projectLinks(links);
+// The hero carries the main actions; the closing Links section lists them all.
+const heroLinks = allLinks.slice(0, 2);
+const hasBody =
+  overviewText.length > 0 ||
+  hasResponsibilities ||
+  developmentItems.length > 0 ||
+  productionText.length > 0 ||
+  challengeItems.length > 0 ||
+  highlightGroups.length > 0 ||
+  technologyGroups.length > 0;
 ---
 
 <BaseLayout title={title} description={summary} image={ogImage}>
   <article>
+    {/* 1. Hero: what it is and the key facts */}
     <Container as="header" class="hero">
       <div class="heading">
         <h1 style={morph.title}>{title}</h1>
         <p class="pitch">{summary}</p>
+        {
+          inProgress && (
+            <p class="wip">
+              <Badge live>Case study in progress</Badge>{" "}
+              <span>Gameplay, screenshots and production notes are on the way.</span>
+            </p>
+          )
+        }
       </div>
       <aside class="details" aria-label="Project details">
         <ProjectMeta project={project.data} />
         {
-          actions.length > 0 && (
+          heroLinks.length > 0 && (
             <div class="actions">
-              {actions.map((action, index) => (
-                <Button href={action.href} variant={index === 0 ? 'primary' : 'secondary'}>
-                  {action.label}
+              {heroLinks.map((link, index) => (
+                <Button href={link.href} variant={index === 0 ? 'primary' : 'secondary'}>
+                  {link.label}
                 </Button>
               ))}
             </div>
@@ -85,59 +129,163 @@ const shots = gallery ?? [];
       </aside>
     </Container>
 
+    {/* 2. Main visual: the video takes priority, otherwise the cover */}
     {
-      cover && (
-        <Container class="cover">
-          <Picture
-            src={cover}
-            alt={coverAlt ?? ''}
-            formats={['avif', 'webp']}
-            widths={[640, 960, 1280, 1920, 2560]}
-            sizes="(min-width: 90rem) 90rem, 100vw"
-            loading="eager"
-            fetchpriority="high"
-            style={morph.cover}
-          />
-        </Container>
-      )
-    }
-
-    {
-      trailer && (
-        <Container as="section" class="media-section" aria-labelledby="trailer-title">
-          <h2 id="trailer-title">Trailer.</h2>
+      trailer ? (
+        <Container as="section" class="feature" aria-label={`${title} trailer`}>
           <YouTubeVideo url={trailer} title={`${title} trailer`} poster={trailerPoster ?? cover} />
         </Container>
+      ) : (
+        cover && (
+          <Container class="feature cover">
+            <Picture
+              src={cover}
+              alt={coverAlt ?? ''}
+              formats={['avif', 'webp']}
+              widths={[640, 960, 1280, 1920, 2560]}
+              sizes="(min-width: 90rem) 90rem, 100vw"
+              loading="eager"
+              fetchpriority="high"
+              style={morph.cover}
+            />
+          </Container>
+        )
       )
     }
 
+    {/* 3–7. The case study */}
     {
-      (sections.length > 0 || bullets.length > 0) && (
+      hasBody && (
         <Container class="body">
-          {sections.map((section) => (
-            <section class="text-section" aria-labelledby={`${section.id}-title`}>
-              <h2 id={`${section.id}-title`}>{section.title}</h2>
+          {overviewText.length > 0 && (
+            <section class="text-section" aria-labelledby="overview-title">
+              <h2 id="overview-title">Overview.</h2>
               <div class="prose">
-                {section.text.map((paragraph) => (
+                {overviewText.map((paragraph) => (
                   <p>{paragraph}</p>
                 ))}
               </div>
             </section>
-          ))}
-          {bullets.length > 0 && (
+          )}
+
+          {hasResponsibilities && (
+            <section class="text-section" aria-labelledby="role-title">
+              <h2 id="role-title">My role.</h2>
+              <div class="stack">
+                {(role || team) && (
+                  <dl class="facts">
+                    {role && (
+                      <div>
+                        <dt>Role</dt>
+                        <dd>{role}</dd>
+                      </div>
+                    )}
+                    {team && (
+                      <div>
+                        <dt>Team</dt>
+                        <dd>{team}</dd>
+                      </div>
+                    )}
+                  </dl>
+                )}
+                <div class="stack-tight">
+                  <p class="label">Responsibilities</p>
+                  {responsibilityList.length > 0 ? (
+                    <CategoryList groups={[{ category: '', items: responsibilityList }]} />
+                  ) : (
+                    <div class="prose">
+                      {responsibilityText.map((paragraph) => (
+                        <p>{paragraph}</p>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </section>
+          )}
+
+          {developmentItems.length > 0 && (
+            <section class="text-section" aria-labelledby="development-title">
+              <h2 id="development-title">Development.</h2>
+              <div class="stack">
+                {developmentItems.map((item) => (
+                  <div class="sub">
+                    <h3>{item.title}</h3>
+                    <div class="prose">
+                      {item.text.map((paragraph) => (
+                        <p>{paragraph}</p>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {productionText.length > 0 && (
+            <section class="text-section" aria-labelledby="production-title">
+              <h2 id="production-title">Production.</h2>
+              <div class="prose">
+                {productionText.map((paragraph) => (
+                  <p>{paragraph}</p>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {challengeItems.length > 0 && (
+            <section class="text-section" aria-labelledby="challenges-title">
+              <h2 id="challenges-title">{'Challenges & solutions.'}</h2>
+              <div class="stack">
+                {challengeItems.map((item) => (
+                  <div class="sub">
+                    <h3>{item.title}</h3>
+                    <dl class="challenge">
+                      {item.challenge.length > 0 && (
+                        <div>
+                          <dt>Challenge</dt>
+                          <dd class="prose">
+                            {item.challenge.map((paragraph) => (
+                              <p>{paragraph}</p>
+                            ))}
+                          </dd>
+                        </div>
+                      )}
+                      {item.solution.length > 0 && (
+                        <div>
+                          <dt>Solution</dt>
+                          <dd class="prose">
+                            {item.solution.map((paragraph) => (
+                              <p>{paragraph}</p>
+                            ))}
+                          </dd>
+                        </div>
+                      )}
+                    </dl>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {highlightGroups.length > 0 && (
             <section class="text-section" aria-labelledby="highlights-title">
               <h2 id="highlights-title">Technical highlights.</h2>
-              <ul class="prose highlights">
-                {bullets.map((item) => (
-                  <li>{item}</li>
-                ))}
-              </ul>
+              <CategoryList groups={highlightGroups} />
+            </section>
+          )}
+
+          {technologyGroups.length > 0 && (
+            <section class="text-section" aria-labelledby="technologies-title">
+              <h2 id="technologies-title">Technologies.</h2>
+              <CategoryList groups={technologyGroups} variant="rows" />
             </section>
           )}
         </Container>
       )
     }
 
+    {/* 8. Gameplay media: extra clips, then screenshots and GIFs (served as-is: converting them would drop the animation) */}
     {
       (clips.length > 0 || shots.length > 0) && (
         <Container as="section" class="media-section" aria-labelledby="gameplay-title">
@@ -156,13 +304,25 @@ const shots = gallery ?? [];
             <ul role="list" class="grid">
               {shots.map((shot) => (
                 <li>
-                  <Image
-                    src={shot.image}
-                    alt={shot.alt}
-                    widths={[640, 960, 1280]}
-                    sizes="(min-width: 48em) 50vw, 100vw"
-                    class="shot"
-                  />
+                  {shot.image.format === 'gif' ? (
+                    <img
+                      src={shot.image.src}
+                      width={shot.image.width}
+                      height={shot.image.height}
+                      alt={shot.alt}
+                      loading="lazy"
+                      decoding="async"
+                      class="shot"
+                    />
+                  ) : (
+                    <Image
+                      src={shot.image}
+                      alt={shot.alt}
+                      widths={[640, 960, 1280]}
+                      sizes="(min-width: 48em) 50vw, 100vw"
+                      class="shot"
+                    />
+                  )}
                 </li>
               ))}
             </ul>
@@ -171,17 +331,37 @@ const shots = gallery ?? [];
       )
     }
 
+    {/* 9–10. Result and links */}
     {
-      play && (
-        <Container as="section" class="play" aria-labelledby="play-title">
-          <h2 id="play-title">Play it.</h2>
-          <Button href={play.href} variant="primary">
-            {play.label}
-          </Button>
+      (resultText.length > 0 || allLinks.length > 0) && (
+        <Container class="body closing">
+          {resultText.length > 0 && (
+            <section class="text-section" aria-labelledby="result-title">
+              <h2 id="result-title">Result.</h2>
+              <div class="prose">
+                {resultText.map((paragraph) => (
+                  <p>{paragraph}</p>
+                ))}
+              </div>
+            </section>
+          )}
+          {allLinks.length > 0 && (
+            <section class="text-section" aria-labelledby="links-title">
+              <h2 id="links-title">Links.</h2>
+              <div class="actions">
+                {allLinks.map((link, index) => (
+                  <Button href={link.href} variant={index === 0 ? 'primary' : 'secondary'}>
+                    {link.label}
+                  </Button>
+                ))}
+              </div>
+            </section>
+          )}
         </Container>
       )
     }
   </article>
+
   {
     (prev || next) && (
       <Container as="nav" class="pager" aria-label="More projects">
@@ -218,12 +398,24 @@ const shots = gallery ?? [];
     font-size: var(--text-lg);
   }
 
+  .wip {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-xs) var(--space-s);
+    color: var(--color-text-muted);
+  }
+
   .details {
     display: grid;
     gap: var(--space-xl);
     align-content: start;
     padding-top: var(--space-l);
     border-top: var(--border-thin) solid var(--color-line);
+  }
+
+  .details:not(:has(dl, .actions)) {
+    display: none;
   }
 
   .actions {
@@ -245,6 +437,7 @@ const shots = gallery ?? [];
     padding-block: var(--space-2xl);
   }
 
+  /* Each section: heading on the left, content on the right (desktop). */
   .text-section {
     display: grid;
     gap: var(--space-l);
@@ -263,14 +456,48 @@ const shots = gallery ?? [];
     font-size: var(--text-lg);
   }
 
-  .highlights {
-    gap: var(--space-xs);
-    max-width: var(--measure);
-    padding-left: 1.25em;
+  .stack {
+    display: grid;
+    gap: var(--space-xl);
   }
 
-  .highlights li::marker {
-    color: var(--color-accent);
+  .stack-tight {
+    display: grid;
+    gap: var(--space-s);
+  }
+
+  .label {
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+  }
+
+  .facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-m) var(--space-2xl);
+    font-size: var(--text-lg);
+  }
+
+  .sub {
+    display: grid;
+    gap: var(--space-s);
+  }
+
+  .challenge {
+    display: grid;
+    gap: var(--space-l);
+  }
+
+  .challenge > div {
+    display: grid;
+    gap: var(--space-xs);
+  }
+
+  .feature {
+    padding-bottom: var(--space-xl);
   }
 
   .media-section {
@@ -299,24 +526,10 @@ const shots = gallery ?? [];
 
   .shot {
     width: 100%;
+    height: auto;
     aspect-ratio: 16 / 9;
     object-fit: cover;
     border: var(--border-thin) solid var(--color-line);
-  }
-
-  .play {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: var(--space-l);
-    margin-top: var(--space-2xl);
-    padding-block: var(--space-2xl);
-    border-block: var(--border-thin) solid var(--color-line);
-  }
-
-  .play h2 {
-    font-size: var(--text-3xl);
   }
 
   .pager {
@@ -357,6 +570,10 @@ const shots = gallery ?? [];
 
   @media (min-width: 48em) {
     .grid {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .challenge {
       grid-template-columns: 1fr 1fr;
     }
 

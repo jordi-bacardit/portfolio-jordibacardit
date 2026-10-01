@@ -16,7 +16,14 @@ const youtubeUrl = z
   .url()
   .refine((url) => /(?:youtube\.com|youtu\.be)\//.test(url), 'Must be a YouTube URL');
 
+// A list that can also be grouped: ["Tank gameplay", ...] or [{ category: "AI", items: [...] }].
+const listOrCategories = z.union([
+  z.array(z.string()),
+  z.array(z.object({ category: z.string(), items: z.array(z.string()) })),
+]);
+
 // One Markdown file per project in src/content/projects/. The file name is the URL slug.
+// Every field except title, summary and order is optional: empty ones are hidden on the page.
 const projects = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/projects' }),
   schema: ({ image }) =>
@@ -24,13 +31,16 @@ const projects = defineCollection({
       .object({
         title: z.string(),
         summary: z.string(),
-        // Required: while unknown it renders as a visible [TODO: status] placeholder.
-        status: optional(z.enum(['prototype', 'in-development', 'complete', 'upcoming'])),
+        // Hidden on the site while unknown (never shown as a placeholder).
+        status: optional(
+          z.enum(['prototype', 'in-development', 'complete', 'archived', 'upcoming']),
+        ),
         order: z.number(),
         featured: z.boolean().default(false),
+        year: optional(z.number().int()),
         type: optional(z.enum(['course', 'personal', 'jam', 'tfg'])),
         engine: optional(z.string()),
-        technologies: optional(z.array(z.string())),
+        technologies: optional(listOrCategories),
         role: optional(z.string()),
         team: optional(z.string()),
         dates: optional(z.string()),
@@ -48,13 +58,22 @@ const projects = defineCollection({
             // Playable build, usually the itch.io page.
             build: optional(z.string().url()),
             repo: optional(z.string().url()),
+            steam: optional(z.string().url()),
+            download: optional(z.string().url()),
+            other: optional(z.array(z.object({ label: z.string(), url: z.string().url() }))),
           }),
         ),
         // Page sections, always in this order with fixed headings; empty ones are hidden.
         overview: optional(z.string()),
-        responsibilities: optional(z.string()),
+        // Plain text (paragraphs) or a list of responsibilities.
+        responsibilities: optional(z.union([z.string(), z.array(z.string())])),
+        development: optional(z.array(z.object({ title: z.string(), description: z.string() }))),
         production: optional(z.string()),
-        highlights: optional(z.array(z.string())),
+        challenges: optional(
+          z.array(z.object({ title: z.string(), challenge: z.string(), solution: z.string() })),
+        ),
+        highlights: optional(listOrCategories),
+        result: optional(z.string()),
       })
       .refine((data) => !data.cover || data.coverAlt, {
         message: 'coverAlt is required when cover is set',
