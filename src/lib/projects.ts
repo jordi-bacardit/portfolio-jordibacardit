@@ -88,7 +88,13 @@ export function transitionStyles(id: string) {
  * own once filled.
  */
 export function caseStudyInProgress(data: Project['data']) {
-  if (data.status === 'upcoming') return false;
+  const missing = caseStudyMissing(data);
+  return missing.media || missing.writeUp;
+}
+
+/** Which half of the case study a built project still lacks (see caseStudyInProgress). */
+export function caseStudyMissing(data: Project['data']) {
+  if (data.status === 'upcoming') return { media: false, writeUp: false };
   const hasMedia = Boolean(
     data.cover || data.trailer || data.gameplay?.length || data.gallery?.length,
   );
@@ -98,7 +104,7 @@ export function caseStudyInProgress(data: Project['data']) {
       data.production ||
       data.challenges?.length,
   );
-  return !hasMedia || !hasWriteUp;
+  return { media: !hasMedia, writeUp: !hasWriteUp };
 }
 
 /** Button label for a playable build: names itch.io when the link points there. */

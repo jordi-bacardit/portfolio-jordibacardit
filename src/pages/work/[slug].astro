@@ -11,6 +11,7 @@ import YouTubeVideo from '../../components/YouTubeVideo.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import {
   caseStudyInProgress,
+  caseStudyMissing,
   getProjects,
   projectLinks,
   toCategories,
@@ -59,6 +60,14 @@ const {
 // The card's title and cover morph into these (see transitionStyles).
 const morph = transitionStyles(project.id);
 const inProgress = caseStudyInProgress(project.data);
+// Names only what's still missing, so the note never promises something already on the page.
+const missing = caseStudyMissing(project.data);
+const inProgressNote =
+  missing.media && missing.writeUp
+    ? 'Gameplay, screenshots and production notes are on the way.'
+    : missing.media
+      ? 'Gameplay and screenshots are on the way.'
+      : 'Production notes are on the way.';
 const ogImage = cover ? (await getImage({ src: cover, width: 1200, format: 'jpg' })).src : undefined;
 
 // Normalised content: blank entries dropped so a section only shows when there's something in it.
@@ -108,7 +117,7 @@ const hasBody =
           inProgress && (
             <p class="wip">
               <Badge live>Case study in progress</Badge>{" "}
-              <span>Gameplay, screenshots and production notes are on the way.</span>
+              <span>{inProgressNote}</span>
             </p>
           )
         }
@@ -285,53 +294,58 @@ const hasBody =
       )
     }
 
-    {/* 8. Gameplay media: extra clips, then screenshots and GIFs (served as-is: converting them would drop the animation) */}
+    {/* 8. Gameplay: extra video clips */}
     {
-      (clips.length > 0 || shots.length > 0) && (
+      clips.length > 0 && (
         <Container as="section" class="media-section" aria-labelledby="gameplay-title">
           <h2 id="gameplay-title">Gameplay.</h2>
-          {clips.length > 0 && (
-            <div class="grid">
-              {clips.map((clip) => (
-                <figure>
-                  <YouTubeVideo url={clip.video} title={clip.title} poster={clip.poster} />
-                  {clip.poster && <figcaption>{clip.title}</figcaption>}
-                </figure>
-              ))}
-            </div>
-          )}
-          {shots.length > 0 && (
-            <ul role="list" class="grid">
-              {shots.map((shot) => (
-                <li>
-                  {shot.image.format === 'gif' ? (
-                    <img
-                      src={shot.image.src}
-                      width={shot.image.width}
-                      height={shot.image.height}
-                      alt={shot.alt}
-                      loading="lazy"
-                      decoding="async"
-                      class="shot"
-                    />
-                  ) : (
-                    <Image
-                      src={shot.image}
-                      alt={shot.alt}
-                      widths={[640, 960, 1280]}
-                      sizes="(min-width: 48em) 50vw, 100vw"
-                      class="shot"
-                    />
-                  )}
-                </li>
-              ))}
-            </ul>
-          )}
+          <div class="grid">
+            {clips.map((clip) => (
+              <figure>
+                <YouTubeVideo url={clip.video} title={clip.title} poster={clip.poster} />
+                {clip.poster && <figcaption>{clip.title}</figcaption>}
+              </figure>
+            ))}
+          </div>
         </Container>
       )
     }
 
-    {/* 9–10. Result and links */}
+    {/* 9. Screenshots and GIFs (GIFs served as-is: converting them would drop the animation) */}
+    {
+      shots.length > 0 && (
+        <Container as="section" class="media-section" aria-labelledby="screenshots-title">
+          <h2 id="screenshots-title">Screenshots.</h2>
+          <ul role="list" class="grid">
+            {shots.map((shot) => (
+              <li>
+                {shot.image.format === 'gif' ? (
+                  <img
+                    src={shot.image.src}
+                    width={shot.image.width}
+                    height={shot.image.height}
+                    alt={shot.alt}
+                    loading="lazy"
+                    decoding="async"
+                    class="shot"
+                  />
+                ) : (
+                  <Image
+                    src={shot.image}
+                    alt={shot.alt}
+                    widths={[640, 960, 1280]}
+                    sizes="(min-width: 48em) 50vw, 100vw"
+                    class="shot"
+                  />
+                )}
+              </li>
+            ))}
+          </ul>
+        </Container>
+      )
+    }
+
+    {/* 10–11. Result and links */}
     {
       (resultText.length > 0 || allLinks.length > 0) && (
         <Container class="body closing">
