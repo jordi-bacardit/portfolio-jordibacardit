@@ -1,5 +1,5 @@
 ---
-title: Assassin’s Creed Revelations
+title: 'Assassin’s Creed: Revelations'
 platforms:
   - PC
 genre: Action-Adventure, Open World, Stealth
