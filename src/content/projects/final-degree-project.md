@@ -8,7 +8,7 @@ title: Final Degree Project
 summary: My Final Degree Project (TFG) on AI and video games. Not built yet.
 status: upcoming # prototype | in-development | complete | archived | upcoming
 year: # e.g. 2027
-order: 3
+order: 4
 featured: false
 
 # Key facts (hero; up to three also appear on the card)

@@ -11,7 +11,7 @@ title: Unreal Engine Gameplay Prototype
 summary: An actor and trigger system in Unreal Engine. Reaching the trigger restarts the level.
 status: prototype # prototype | in-development | complete | archived | upcoming
 year: # e.g. 2026
-order: 2
+order: 3
 featured: false
 
 # Key facts (hero; up to three also appear on the card)
