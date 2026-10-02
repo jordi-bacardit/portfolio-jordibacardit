@@ -1,10 +1,9 @@
 ---
 // Project metadata as a <dl>. Only known values are shown: a missing field is hidden, never
 // replaced by a placeholder.
-// - "compact" (cards): at most three values.
-// - "full" (project hero): the key facts a recruiter scans first. Technologies have their own
-//   section on the page, so they're not repeated here.
-import { flatItems, statusLabels, typeLabels, type Project } from '../lib/projects';
+// - "compact" (cards): at most four values, with the card's shorter role when there is one.
+// - "full" (project hero): the key facts a recruiter scans first.
+import { statusLabels, typeLabels, type Project } from '../lib/projects';
 
 interface Props {
   project: Project['data'];
@@ -15,30 +14,30 @@ const { project, variant = 'full' } = Astro.props;
 
 const status = project.status && statusLabels[project.status];
 const type = project.type && typeLabels[project.type];
+const timeline = project.year ? undefined : project.dates;
 
 const items = (
   variant === 'full'
     ? [
         { label: 'Status', value: status },
         { label: 'Year', value: project.year?.toString() },
-        { label: 'Dates', value: project.year ? undefined : project.dates },
-        { label: 'My role', value: project.role },
+        { label: 'Timeline', value: timeline },
+        { label: 'Role', value: project.role },
         { label: 'Team', value: project.team },
+        { label: 'Duration', value: project.duration },
         { label: 'Engine', value: project.engine },
         { label: 'Type', value: type },
       ]
     : [
         { label: 'Status', value: status },
-        { label: 'Type', value: type },
-        { label: 'Engine', value: project.engine },
-        { label: 'Technologies', value: flatItems(project.technologies).join(', ') },
-        { label: 'My role', value: project.role },
+        { label: 'Timeline', value: timeline },
+        { label: 'Role', value: project.card?.role ?? project.role },
         { label: 'Team', value: project.team },
-        { label: 'Dates', value: project.dates },
+        { label: 'Engine', value: project.engine },
       ]
 ).filter((item) => item.value);
 
-const shown = variant === 'compact' ? items.slice(0, 3) : items;
+const shown = variant === 'compact' ? items.slice(0, 4) : items;
 ---
 
 {

@@ -13,19 +13,20 @@ const { study } = site;
 const facts = [
   { label: 'Studying', value: study.degree },
   { label: 'University', value: `${study.school}, ${study.country}` },
+  ...(study.graduation ? [{ label: 'Graduating', value: study.graduation }] : []),
   {
     label: 'Based in',
     value: `${site.location}${site.openToRelocation ? ', open to relocation' : ''}`,
   },
-  { label: 'Focus', value: 'Game production, with a technical game-development background' },
-  { label: 'Open to', value: 'Internships and junior roles' },
-  ...(study.graduationYear ? [{ label: 'Graduation', value: study.graduationYear }] : []),
+  { label: 'Languages', value: site.languages },
+  { label: 'Focus', value: 'Game design, backed by production and technical skills' },
+  { label: 'Open to', value: 'Game design internships and junior roles' },
 ];
 ---
 
 <BaseLayout
   title="About"
-  description={`About ${site.name}: ${study.degree} student at ${study.school}, focused on game production with a technical game-development background.`}
+  description={`About ${site.name}: ${study.degree} student at ${study.school}, working towards a career in game design.`}
 >
   <section class="hero" aria-labelledby="about-title">
     <div class="photo">
@@ -42,7 +43,8 @@ const facts = [
     <div class="hero-text">
       <h1 id="about-title"><SplitText text="Who I am." /></h1>
       <p class="lead">
-        I'm {site.name}, a {study.degree} student at {study.school}, {study.country}.
+        I'm {site.name}, a {study.degree} student at {study.school}, {study.country}, working
+        towards a career in game design.
       </p>
     </div>
   </section>
@@ -61,19 +63,21 @@ const facts = [
   </Container>
 
   <Container as="section" class="focus" aria-labelledby="focus-title">
-    <h2 id="focus-title" class="statement">
-      Game production, backed by a technical game-development background.
-    </h2>
+    <h2 id="focus-title" class="statement">Game design, backed by production and technical skills.</h2>
     <div class="text">
       <p>
-        My focus is game production: project coordination, planning, production pipelines and team
-        coordination.
+        My goal is to work as a game designer. I like thinking about how a game should feel to play,
+        and then turning that into rules, systems and levels that can be built, tested and improved.
       </p>
       <p>
-        It's backed by a technical game-development background: I've built projects in Unity and
-        Unreal Engine, and I've worked with C#, C++ and the other languages and tools below.
+        I've also planned and coordinated small projects: setting the scope, organising tasks in
+        Trello, keeping the team in sync, running playtests with friends and deciding what to cut to
+        finish on time.
       </p>
-      <p>I'm looking for internships and junior roles in game production in the European games industry.</p>
+      <p>
+        I've built projects in Unity and Unreal Engine myself, so I understand how the things I
+        design actually get made.
+      </p>
       <div class="actions">
         {
           site.cv ? (
@@ -89,24 +93,43 @@ const facts = [
     </div>
   </Container>
 
+  <Container as="section" class="library" aria-labelledby="library-title">
+    <h2 id="library-title">Game Library.</h2>
+    <div class="text">
+      <p>
+        I've been playing games since I was six. RPGs, MMOs, shooters, sandbox and survival games
+        are where I spend most of my time. My game library is a personal archive of the games I've
+        played and the ones that shaped me.
+      </p>
+      <div class="actions">
+        <Button href="/game-library">Open the game library</Button>
+      </div>
+    </div>
+  </Container>
+
   <Container as="section" class="tech" aria-labelledby="tech-title">
     <h2 id="tech-title">Tools.</h2>
-    <dl class="tech-list">
-      {
-        technologies.map((group) => (
-          <div class="tech-row">
-            <dt>{group.category}</dt>
-            <dd>
-              <ul role="list">
-                {group.items.map((item) => (
-                  <li>{item}</li>
-                ))}
-              </ul>
-            </dd>
-          </div>
-        ))
-      }
-    </dl>
+    <div>
+      <dl class="tech-list">
+        {
+          technologies.map((group) => (
+            <div class="tech-row">
+              <dt>{group.category}</dt>
+              <dd>
+                <ul role="list">
+                  {group.items.map((item) => (
+                    <li>{item}</li>
+                  ))}
+                </ul>
+              </dd>
+            </div>
+          ))
+        }
+      </dl>
+      <p class="tech-note">
+        Outside games, I've also built websites and apps, including iOS apps in Swift.
+      </p>
+    </div>
   </Container>
 </BaseLayout>
 
@@ -248,6 +271,17 @@ const facts = [
     margin-top: var(--space-m);
   }
 
+  /* Game Library */
+  .library {
+    display: grid;
+    gap: var(--space-xl);
+    padding-bottom: var(--space-3xl);
+  }
+
+  .library h2 {
+    font-size: var(--text-2xl);
+  }
+
   /* Tools */
   .tech {
     display: grid;
@@ -269,6 +303,12 @@ const facts = [
     font-size: var(--text-lg);
   }
 
+  .tech-note {
+    padding-top: var(--space-l);
+    border-top: var(--border-thin) solid var(--color-line);
+    color: var(--color-text-muted);
+  }
+
   @media (min-width: 48em) {
     .tech-row {
       grid-template-columns: 11rem 1fr;
@@ -278,6 +318,7 @@ const facts = [
 
   @media (min-width: 64em) {
     .focus,
+    .library,
     .tech {
       grid-template-columns: 5fr 7fr;
       align-items: start;

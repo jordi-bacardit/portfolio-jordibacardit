@@ -1,0 +1,161 @@
+---
+// Rising difficulty across a sequence (e.g. Level 1 → Boss): one bar per stage, each taller than
+// the last, under a thin accent arrow. Drawn from data in the project file, in the site's tokens.
+// The shapes are SVG; every word is HTML (step names aligned under the bars, the levers and the
+// caption), so the text stays readable at any width.
+interface Props {
+  steps: string[];
+  levers?: string[];
+  caption?: string;
+}
+
+const { steps, levers = [], caption } = Astro.props;
+
+// Geometry in viewBox units. Bars span the full width with a 5% gap, which the HTML labels below
+// repeat with a grid (same columns, column-gap: 5%), so each name sits under its bar.
+const width = 400;
+const height = 170;
+const baseline = 168;
+const gap = width * 0.05;
+const barWidth = (width - gap * (steps.length - 1)) / steps.length;
+const bars = steps.map((_, index) => {
+  const barHeight = ((baseline - 34) * (index + 1)) / steps.length;
+  const x = index * (barWidth + gap);
+  return { x, y: baseline - barHeight, height: barHeight, center: x + barWidth / 2 };
+});
+const first = bars[0];
+const last = bars[bars.length - 1];
+const lift = 14;
+const tip = { x: last.center, y: last.y - lift };
+const description = `Difficulty rises from ${steps.join(' to ')}.`;
+---
+
+<figure class="diagram" style={`--steps: ${steps.length}`}>
+  <p class="label" aria-hidden="true">Difficulty</p>
+  <div class="chart">
+    <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={description}>
+      <line class="base" x1="0" y1={baseline} x2={width} y2={baseline}></line>
+      {
+        bars.map((bar, index) => (
+          <rect
+            class:list={['bar', { peak: index === bars.length - 1 }]}
+            x={bar.x + 0.5}
+            y={bar.y}
+            width={barWidth - 1}
+            height={bar.height}
+          />
+        ))
+      }
+      <line
+        class="trend"
+        x1={first.center}
+        y1={first.y - lift}
+        x2={tip.x - 8}
+        y2={tip.y + 2.5}
+      ></line>
+      <polygon
+        class="arrow"
+        points={`${tip.x},${tip.y} ${tip.x - 12},${tip.y - 4} ${tip.x - 9},${tip.y + 7}`}
+      ></polygon>
+    </svg>
+    <ol class="steps" role="list" aria-hidden="true">
+      {steps.map((step) => <li>{step}</li>)}
+    </ol>
+  </div>
+  {
+    levers.length > 0 && (
+      <div class="levers">
+        <p class="label">What makes it harder</p>
+        <ul role="list">
+          {levers.map((lever) => (
+            <li>{lever}</li>
+          ))}
+        </ul>
+      </div>
+    )
+  }
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>
+
+<style>
+  .diagram {
+    display: grid;
+    gap: var(--space-l);
+    max-width: 40rem;
+    padding: var(--space-l);
+    border: var(--border-thin) solid var(--color-line);
+  }
+
+  .chart {
+    display: grid;
+    gap: var(--space-s);
+  }
+
+  svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  .base {
+    stroke: var(--color-line);
+    stroke-width: 1;
+  }
+
+  .bar {
+    fill: var(--color-surface);
+    stroke: var(--color-line);
+    stroke-width: 1;
+  }
+
+  .peak {
+    stroke: var(--color-text-muted);
+  }
+
+  .trend {
+    stroke: var(--color-accent);
+    stroke-width: 2;
+  }
+
+  .arrow {
+    fill: var(--color-accent);
+  }
+
+  /* Same columns as the bars: equal widths with a 5% gap. */
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(var(--steps), minmax(0, 1fr));
+    column-gap: 5%;
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    text-align: center;
+  }
+
+  .label {
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+  }
+
+  .levers {
+    display: grid;
+    gap: var(--space-xs);
+  }
+
+  .levers ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs) var(--space-l);
+    font-size: var(--text-lg);
+  }
+
+  figcaption {
+    padding-top: var(--space-s);
+    border-top: var(--border-thin) solid var(--color-line);
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+  }
+</style>

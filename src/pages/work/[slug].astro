@@ -1,18 +1,20 @@
 ---
-// The one template every project page uses. Each section only renders when the project's file
-// has data for it, so projects with few fields stay short and never show empty headings.
+// The one template every project page uses. The case study is the project file's own list of
+// sections, in its order; each block only renders when it has data, so pages never show empty
+// headings.
 import { getImage, Image, Picture } from 'astro:assets';
 import Badge from '../../components/Badge.astro';
 import Button from '../../components/Button.astro';
 import CategoryList from '../../components/CategoryList.astro';
 import Container from '../../components/Container.astro';
+import ProgressionDiagram from '../../components/ProgressionDiagram.astro';
 import ProjectMeta from '../../components/ProjectMeta.astro';
 import YouTubeVideo from '../../components/YouTubeVideo.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import {
   caseStudyInProgress,
   caseStudyMissing,
-  getProjects,
+  getProjectGroups,
   projectLinks,
   toCategories,
   transitionStyles,
@@ -20,12 +22,16 @@ import {
 } from '../../lib/projects';
 import { paragraphs } from '../../lib/text';
 
+// Previous/next runs through the main projects only; prototypes get no pager.
 export async function getStaticPaths() {
-  const projects = await getProjects();
-  return projects.map((project, index) => ({
-    params: { slug: project.id },
-    props: { project, prev: projects[index - 1], next: projects[index + 1] },
-  }));
+  const { main, prototypes } = await getProjectGroups();
+  return [
+    ...main.map((project, index) => ({
+      params: { slug: project.id },
+      props: { project, prev: main[index - 1], next: main[index + 1] },
+    })),
+    ...prototypes.map((project) => ({ params: { slug: project.id }, props: { project } })),
+  ];
 }
 
 interface Props {
@@ -38,8 +44,6 @@ const { project, prev, next } = Astro.props;
 const {
   title,
   summary,
-  role,
-  team,
   cover,
   coverAlt,
   trailer,
@@ -47,14 +51,8 @@ const {
   gameplay,
   gallery,
   links,
-  overview,
-  responsibilities,
-  development,
-  production,
-  challenges,
-  highlights,
-  technologies,
-  result,
+  sections,
+  technicalNotes,
 } = project.data;
 
 // The card's title and cover morph into these (see transitionStyles).
@@ -70,40 +68,43 @@ const inProgressNote =
       : 'Production notes are on the way.';
 const ogImage = cover ? (await getImage({ src: cover, width: 1200, format: 'jpg' })).src : undefined;
 
-// Normalised content: blank entries dropped so a section only shows when there's something in it.
-const overviewText = paragraphs(overview);
-const responsibilityList = Array.isArray(responsibilities)
-  ? responsibilities.map((item) => item.trim()).filter(Boolean)
-  : [];
-const responsibilityText = Array.isArray(responsibilities) ? [] : paragraphs(responsibilities);
-const hasResponsibilities = responsibilityList.length > 0 || responsibilityText.length > 0;
-const developmentItems = (development ?? [])
-  .map((item) => ({ title: item.title.trim(), text: paragraphs(item.description) }))
-  .filter((item) => item.title && item.text.length > 0);
-const productionText = paragraphs(production);
-const challengeItems = (challenges ?? [])
-  .map((item) => ({
-    title: item.title.trim(),
-    challenge: paragraphs(item.challenge),
-    solution: paragraphs(item.solution),
+// Normalised sections: blank blocks dropped, and a section with nothing left isn't shown.
+const slugify = (text: string) =>
+  text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+const caseStudy = (sections ?? [])
+  .map((section) => ({
+    id: `section-${slugify(section.title)}`,
+    title: section.title.trim(),
+    text: paragraphs(section.text),
+    diagram: section.diagram,
+    lists: toCategories(section.lists),
+    entries: (section.entries ?? [])
+      .map((entry) => ({
+        label: entry.label?.trim(),
+        title: entry.title.trim(),
+        text: paragraphs(entry.text),
+      }))
+      .filter((entry) => entry.title),
+    note: section.note?.trim(),
   }))
-  .filter((item) => item.title && (item.challenge.length > 0 || item.solution.length > 0));
-const highlightGroups = toCategories(highlights);
-const technologyGroups = toCategories(technologies);
-const resultText = paragraphs(result);
+  .filter(
+    (section) =>
+      section.title &&
+      (section.text.length > 0 ||
+        section.diagram ||
+        section.lists.length > 0 ||
+        section.entries.length > 0 ||
+        section.note),
+  );
+const notesText = paragraphs(technicalNotes);
 const clips = gameplay ?? [];
 const shots = gallery ?? [];
 const allLinks = projectLinks(links);
 // The hero carries the main actions; the closing Links section lists them all.
 const heroLinks = allLinks.slice(0, 2);
-const hasBody =
-  overviewText.length > 0 ||
-  hasResponsibilities ||
-  developmentItems.length > 0 ||
-  productionText.length > 0 ||
-  challengeItems.length > 0 ||
-  highlightGroups.length > 0 ||
-  technologyGroups.length > 0;
 ---
 
 <BaseLayout title={title} description={summary} image={ogImage}>
@@ -162,139 +163,55 @@ const hasBody =
       )
     }
 
-    {/* 3–7. The case study */}
+    {/* 3. The case study: the project file's sections, in order */}
     {
-      hasBody && (
+      caseStudy.length > 0 && (
         <Container class="body">
-          {overviewText.length > 0 && (
-            <section class="text-section" aria-labelledby="overview-title">
-              <h2 id="overview-title">Overview.</h2>
-              <div class="prose">
-                {overviewText.map((paragraph) => (
-                  <p>{paragraph}</p>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {hasResponsibilities && (
-            <section class="text-section" aria-labelledby="role-title">
-              <h2 id="role-title">My role.</h2>
+          {caseStudy.map((section) => (
+            <section class="text-section" aria-labelledby={section.id}>
+              <h2 id={section.id}>{`${section.title}.`}</h2>
               <div class="stack">
-                {(role || team) && (
-                  <dl class="facts">
-                    {role && (
-                      <div>
-                        <dt>Role</dt>
-                        <dd>{role}</dd>
-                      </div>
-                    )}
-                    {team && (
-                      <div>
-                        <dt>Team</dt>
-                        <dd>{team}</dd>
-                      </div>
-                    )}
-                  </dl>
+                {section.text.length > 0 && (
+                  <div class="prose">
+                    {section.text.map((paragraph) => (
+                      <p>{paragraph}</p>
+                    ))}
+                  </div>
                 )}
-                <div class="stack-tight">
-                  <p class="label">Responsibilities</p>
-                  {responsibilityList.length > 0 ? (
-                    <CategoryList groups={[{ category: '', items: responsibilityList }]} />
-                  ) : (
-                    <div class="prose">
-                      {responsibilityText.map((paragraph) => (
-                        <p>{paragraph}</p>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </section>
-          )}
-
-          {developmentItems.length > 0 && (
-            <section class="text-section" aria-labelledby="development-title">
-              <h2 id="development-title">Development.</h2>
-              <div class="stack">
-                {developmentItems.map((item) => (
-                  <div class="sub">
-                    <h3>{item.title}</h3>
-                    <div class="prose">
-                      {item.text.map((paragraph) => (
-                        <p>{paragraph}</p>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {productionText.length > 0 && (
-            <section class="text-section" aria-labelledby="production-title">
-              <h2 id="production-title">Production.</h2>
-              <div class="prose">
-                {productionText.map((paragraph) => (
-                  <p>{paragraph}</p>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {challengeItems.length > 0 && (
-            <section class="text-section" aria-labelledby="challenges-title">
-              <h2 id="challenges-title">{'Challenges & solutions.'}</h2>
-              <div class="stack">
-                {challengeItems.map((item) => (
-                  <div class="sub">
-                    <h3>{item.title}</h3>
-                    <dl class="challenge">
-                      {item.challenge.length > 0 && (
-                        <div>
-                          <dt>Challenge</dt>
-                          <dd class="prose">
-                            {item.challenge.map((paragraph) => (
+                {section.diagram && (
+                  <ProgressionDiagram
+                    steps={section.diagram.steps}
+                    levers={section.diagram.levers}
+                    caption={section.diagram.caption}
+                  />
+                )}
+                {section.lists.length > 0 && <CategoryList groups={section.lists} />}
+                {section.entries.length > 0 && (
+                  <div class="stack">
+                    {section.entries.map((entry) => (
+                      <div class="sub">
+                        {entry.label && <p class="label">{entry.label}</p>}
+                        <h3>{entry.title}</h3>
+                        {entry.text.length > 0 && (
+                          <div class="prose">
+                            {entry.text.map((paragraph) => (
                               <p>{paragraph}</p>
                             ))}
-                          </dd>
-                        </div>
-                      )}
-                      {item.solution.length > 0 && (
-                        <div>
-                          <dt>Solution</dt>
-                          <dd class="prose">
-                            {item.solution.map((paragraph) => (
-                              <p>{paragraph}</p>
-                            ))}
-                          </dd>
-                        </div>
-                      )}
-                    </dl>
+                          </div>
+                        )}
+                      </div>
+                    ))}
                   </div>
-                ))}
+                )}
+                {section.note && <p class="note">{section.note}</p>}
               </div>
             </section>
-          )}
-
-          {highlightGroups.length > 0 && (
-            <section class="text-section" aria-labelledby="highlights-title">
-              <h2 id="highlights-title">Technical highlights.</h2>
-              <CategoryList groups={highlightGroups} />
-            </section>
-          )}
-
-          {technologyGroups.length > 0 && (
-            <section class="text-section" aria-labelledby="technologies-title">
-              <h2 id="technologies-title">Technologies.</h2>
-              <CategoryList groups={technologyGroups} variant="rows" />
-            </section>
-          )}
+          ))}
         </Container>
       )
     }
 
-    {/* 8. Gameplay: extra video clips */}
+    {/* 4. Gameplay: extra video clips */}
     {
       clips.length > 0 && (
         <Container as="section" class="media-section" aria-labelledby="gameplay-title">
@@ -311,7 +228,7 @@ const hasBody =
       )
     }
 
-    {/* 9. Screenshots and GIFs (GIFs served as-is: converting them would drop the animation) */}
+    {/* 5. Screenshots and GIFs (GIFs served as-is: converting them would drop the animation) */}
     {
       shots.length > 0 && (
         <Container as="section" class="media-section" aria-labelledby="screenshots-title">
@@ -345,15 +262,15 @@ const hasBody =
       )
     }
 
-    {/* 10–11. Result and links */}
+    {/* 6. Technical notes and links */}
     {
-      (resultText.length > 0 || allLinks.length > 0) && (
+      (notesText.length > 0 || allLinks.length > 0) && (
         <Container class="body closing">
-          {resultText.length > 0 && (
-            <section class="text-section" aria-labelledby="result-title">
-              <h2 id="result-title">Result.</h2>
+          {notesText.length > 0 && (
+            <section class="text-section" aria-labelledby="technical-notes-title">
+              <h2 id="technical-notes-title">Technical notes.</h2>
               <div class="prose">
-                {resultText.map((paragraph) => (
+                {notesText.map((paragraph) => (
                   <p>{paragraph}</p>
                 ))}
               </div>
@@ -475,11 +392,6 @@ const hasBody =
     gap: var(--space-xl);
   }
 
-  .stack-tight {
-    display: grid;
-    gap: var(--space-s);
-  }
-
   .label {
     color: var(--color-text-muted);
     font-family: var(--font-mono);
@@ -488,26 +400,14 @@ const hasBody =
     text-transform: uppercase;
   }
 
-  .facts {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-m) var(--space-2xl);
-    font-size: var(--text-lg);
-  }
-
   .sub {
     display: grid;
     gap: var(--space-s);
   }
 
-  .challenge {
-    display: grid;
-    gap: var(--space-l);
-  }
-
-  .challenge > div {
-    display: grid;
-    gap: var(--space-xs);
+  .note {
+    max-width: 52rem;
+    color: var(--color-text-muted);
   }
 
   .feature {
@@ -584,10 +484,6 @@ const hasBody =
 
   @media (min-width: 48em) {
     .grid {
-      grid-template-columns: 1fr 1fr;
-    }
-
-    .challenge {
       grid-template-columns: 1fr 1fr;
     }
 

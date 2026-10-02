@@ -16,11 +16,29 @@ const youtubeUrl = z
   .url()
   .refine((url) => /(?:youtube\.com|youtu\.be)\//.test(url), 'Must be a YouTube URL');
 
-// A list that can also be grouped: ["Tank gameplay", ...] or [{ category: "AI", items: [...] }].
-const listOrCategories = z.union([
-  z.array(z.string()),
-  z.array(z.object({ category: z.string(), items: z.array(z.string()) })),
-]);
+// One section of a project page: a heading plus any of these blocks, always rendered in this
+// order (text, diagram, lists, entries, note). Sections appear in the order of the file.
+const section = z.object({
+  title: z.string(),
+  // Paragraphs, separated by a blank line.
+  text: optional(z.string()),
+  // A rising-difficulty diagram: steps left to right, plus what makes it rise.
+  diagram: optional(
+    z.object({
+      steps: z.array(z.string()).min(2),
+      levers: optional(z.array(z.string())),
+      caption: optional(z.string()),
+    }),
+  ),
+  // Bullet lists; labelled lists sit side by side ("What I did" / "What my teammate did").
+  lists: optional(z.array(z.object({ label: optional(z.string()), items: z.array(z.string()) }))),
+  // Titled items: design decisions, roadmap phases (label: e.g. their dates).
+  entries: optional(
+    z.array(z.object({ label: optional(z.string()), title: z.string(), text: optional(z.string()) })),
+  ),
+  // A short line in muted text at the end.
+  note: optional(z.string()),
+});
 
 // One Markdown file per project in src/content/projects/. The file name is the URL slug.
 // Every field except title, summary and order is optional: empty ones are hidden on the page.
@@ -31,19 +49,33 @@ const projects = defineCollection({
       .object({
         title: z.string(),
         summary: z.string(),
-        // Hidden on the site while unknown (never shown as a placeholder).
+        // Hidden on the site while unknown (never shown as a placeholder). Prototypes are listed
+        // apart, under Prototypes on /work.
         status: optional(
-          z.enum(['prototype', 'in-development', 'complete', 'archived', 'upcoming']),
+          z.enum([
+            'prototype',
+            'in-development',
+            'complete',
+            'released',
+            'archived',
+            'planned',
+            'upcoming',
+          ]),
         ),
         order: z.number(),
         featured: z.boolean().default(false),
         year: optional(z.number().int()),
         type: optional(z.enum(['course', 'personal', 'jam', 'tfg'])),
         engine: optional(z.string()),
-        technologies: optional(listOrCategories),
         role: optional(z.string()),
         team: optional(z.string()),
+        duration: optional(z.string()),
+        // Shown as "Timeline" (only when there's no year).
         dates: optional(z.string()),
+        // Shorter text for the Home and Work cards; the page's own values are used when empty.
+        card: optional(
+          z.object({ summary: optional(z.string()), role: optional(z.string()) }),
+        ),
         cover: optional(image()),
         coverAlt: optional(z.string()),
         trailer: optional(youtubeUrl),
@@ -63,17 +95,10 @@ const projects = defineCollection({
             other: optional(z.array(z.object({ label: z.string(), url: z.string().url() }))),
           }),
         ),
-        // Page sections, always in this order with fixed headings; empty ones are hidden.
-        overview: optional(z.string()),
-        // Plain text (paragraphs) or a list of responsibilities.
-        responsibilities: optional(z.union([z.string(), z.array(z.string())])),
-        development: optional(z.array(z.object({ title: z.string(), description: z.string() }))),
-        production: optional(z.string()),
-        challenges: optional(
-          z.array(z.object({ title: z.string(), challenge: z.string(), solution: z.string() })),
-        ),
-        highlights: optional(listOrCategories),
-        result: optional(z.string()),
+        // The case study, in the order written in the file.
+        sections: optional(z.array(section)),
+        // Short closing notes (build, controls), shown at the end next to the links.
+        technicalNotes: optional(z.string()),
       })
       .refine((data) => !data.cover || data.coverAlt, {
         message: 'coverAlt is required when cover is set',

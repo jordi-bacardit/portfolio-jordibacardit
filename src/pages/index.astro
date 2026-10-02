@@ -7,9 +7,10 @@ import ProjectList from '../components/ProjectList.astro';
 import SplitText from '../components/SplitText.astro';
 import { site } from '../data/site';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { getProjects } from '../lib/projects';
+import { getProjectGroups } from '../lib/projects';
 
-const projects = await getProjects();
+// Prototypes stay on /work only.
+const { main: projects } = await getProjectGroups();
 const [firstName, ...lastName] = site.name.split(' ');
 ---
 
@@ -25,8 +26,9 @@ const [firstName, ...lastName] = site.name.split(' ');
       <p class="role">{site.role}</p>
       <div class="details">
         <p class="study">
-          {site.study.degree} student at {site.study.school}, focused on game production with a
-          technical game-development background.
+          {site.study.degree} student at {site.study.school}, working towards a career in game
+          design. I design and plan small games end to end, from the first idea to playtesting and
+          release.
         </p>
         <p class="status"><span class="dot" aria-hidden="true"></span>{site.lookingFor}.</p>
         <div class="actions">
@@ -59,7 +61,7 @@ const [firstName, ...lastName] = site.name.split(' ');
     />
     <div class="about-body">
       <h2 id="about-title" class="statement">
-        Game production, backed by a technical game-development background.
+        Game design, backed by production and technical skills.
       </h2>
       <Button href="/about">About me</Button>
     </div>

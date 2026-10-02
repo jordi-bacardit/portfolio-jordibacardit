@@ -9,7 +9,7 @@
 
 # Jordi Bacardit — Game Portfolio
 
-Personal portfolio of Jordi Bacardit, student of Multimedia, Applications & Video Games Engineering at Universitat de Vic (UVic), Spain. Its job is to help me land an internship or junior role in the European games industry, focused on game production and backed by a technical game-development background. Studio recruiters and producers will skim it in a few minutes, usually from a job application, so judge every decision by one question: does this help them understand who I am and trust what they see?
+Personal portfolio of Jordi Bacardit, student of Multimedia, Applications & Video Games Engineering at Universitat de Vic (UVic), Spain. Its job is to help me land a game design internship or junior role in the European games industry. Game design is the area I'm working towards (changed 2026-10-02; before, the site was about game production), backed by production and technical skills. I'm not a game designer yet: never present me as "Game Designer" on its own, as if it were my current job title (a role on a specific project, like "Game Designer & Producer" on Lost On The Gates, is fine). Studio recruiters and producers will skim it in a few minutes, usually from a job application, so judge every decision by one question: does this help them understand who I am and trust what they see?
 
 ## Working agreement
 
@@ -70,14 +70,15 @@ Recruiters check details. One invented fact (a studio, a job, a team size, a dat
 - Don't upgrade facts: a prototype stays a prototype, a course project isn't "shipped", having used a tool isn't expertise. Show technologies as a plain list: no skill bars, percentages or levels.
 
 Confirmed facts:
-- Focus: game production (producer, project coordination, planning, production pipelines, team coordination), with a technical game-development background.
-- Tools and technologies I've worked with: Unreal Engine, Unity, C#, C++, C, PHP, Laravel, JavaScript, Kotlin, Python, MySQL, MongoDB, Git, GitHub, Android Studio, Visual Studio Code, Tailwind CSS, Astro.
-- Lost On The Gates: World War II tank survival game, Unity and C#. Confirmed: tank gameplay, enemy AI with NavMeshAgent, turret systems, HUD, kill counter, prefabs. Personal project, team of 2. Released on itch.io (https://thejorch.itch.io/lost-on-the-gates, WebGL); its description, features and controls are mine and can be used. What I did (from my CV): enemy AI, turret aiming and shooting, health and ammunition systems, kill tracking, HUD and scene flow. My role: Gameplay Programmer & Producer. Media in `src/assets/projects/lost-on-the-gates/`; trailer on YouTube (https://youtu.be/rlXHXNEyGjY); a gameplay video exists locally. Unknown: year/dates, the team's disciplines, my Producer tasks.
-- Finn Adventure: 2D pixel platformer, Unity and C#, my first video game project. Solo, personal project. Released on itch.io (https://thejorch.itch.io/finn-adventure, WebGL); its description, features and controls are mine and can be used: three levels with obstacles and enemies, jump-to-defeat enemies, level progression, final boss; controls A/D and Space. Media in `src/assets/projects/finn-adventure/`; trailer on YouTube (https://youtu.be/ulvRNFzOxEM); a gameplay video exists locally. Unknown: year/dates, my role title.
-- Unreal Engine gameplay prototype: an actor/trigger system; reaching the trigger restarts the level. Nothing else confirmed.
-- TFG (Final Degree Project): AI and video games, not built yet. Two candidate directions: "ArtScan AI" (not defined; don't describe it) and a small Unreal Engine RPG with AI-driven NPCs. Always labelled Upcoming / In development / TFG. No screenshots, features or results.
+- Focus: game design (working towards it), backed by production (scope, planning, task coordination, playtesting, cutting to finish on time) and technical skills (I've built projects in Unity and Unreal Engine).
+- Studies: Multimedia, Applications & Video Games Engineering, UVic; graduating late 2027. Languages: Catalan and Spanish (native), English (advanced). Playing games since I was six; mostly RPGs, MMOs, shooters, sandbox and survival games.
+- Tools and technologies I've worked with: Figma, Trello, Google Sheets, Unreal Engine, Unity, C#, C++, C, PHP, Laravel, JavaScript, Kotlin, Swift, Python, MySQL, MongoDB, Git, GitHub, Android Studio, Visual Studio Code, Tailwind CSS, Astro. Outside games I've built websites and apps, including iOS apps in Swift.
+- Lost On The Gates: World War II tank survival game in Unity, team of 2, personal project, 3 months part-time, released on itch.io (https://thejorch.itch.io/lost-on-the-gates, WebGL). My role: Game Designer & Producer: concept, game design and project management (Trello, GitHub, near-daily check-ins, WhatsApp), health and ammunition, kill tracking, HUD, scene flow, sound integration, lighting and atmosphere, playtests with friends, the itch.io release and the trailer; I helped build the tank and the enemies. My teammate led the tank setup (movement and turret) and the enemy system (AI with NavMeshAgent, navigation, spawning). The map is a third-party asset pack. The design decisions, playtesting changes, scope cut (multiplayer) and postmortem in `src/content/projects/lost-on-the-gates.md` are mine. Trailer: https://youtu.be/rlXHXNEyGjY; a gameplay video exists locally. Unknown: year/dates.
+- Finn Adventure: my first game, a 2D pixel platformer made solo in Unity in 1.5 months, personal project, released on itch.io (https://thejorch.itch.io/finn-adventure, WebGL). Role: solo developer (design, programming, level design). Three levels and a boss; difficulty grows through level layout (harder jumps, timing, more enemies); the boss gets faster each hit. It has a single checkpoint: don't mention checkpoints. Controls A/D and Space. Trailer: https://youtu.be/ulvRNFzOxEM; a gameplay video exists locally. Unknown: year/dates.
+- Unreal Engine gameplay prototype: an actor/trigger system; reaching the trigger restarts the level. Nothing else confirmed. Listed under Prototypes, kept as a short description.
+- TFG (Final Degree Project): a small RPG where you talk to AI-driven NPCs by typing, with no pre-written lines. Planned, January – June 2027 (roadmap in its project file). Not built yet: always labelled Planned / In development / TFG; no screenshots, features or results until they exist.
 - Domain: https://jordibacardit.com (hosted on Netlify, deployed from GitHub `main`).
-- Contact and CV (from my CV, `public/cv/jordi-bacardit-cv.pdf`): email jordibacardit12@gmail.com, LinkedIn https://www.linkedin.com/in/jordi-bacardit/, based in Barcelona, Spain, open to relocation. Other CV details (graduation year, Lost On The Gates specifics, other projects, work experience, languages) are not approved for the site yet: ask before using them.
+- Contact and CV (from my CV, `public/cv/jordi-bacardit-cv.pdf`): email jordibacardit12@gmail.com, LinkedIn https://www.linkedin.com/in/jordi-bacardit/, based in Barcelona, Spain, open to relocation. Other CV details (other projects, work experience) are not approved for the site yet: ask before using them. The CV source is `Downloads\Jordi_Bacardit_CV_source.html` (printed to PDF with Edge).
 - GitHub: https://github.com/jordi-bacardit
 
 <!-- Cuando confirmes datos (rol, fechas, equipo, herramientas de producción...), añádelos arriba o en los archivos de datos. -->
@@ -86,25 +87,26 @@ Confirmed facts:
 
 <!-- Si tus rutas actuales son otras, conserva las tuyas y actualiza esta lista. -->
 
-- `/` Home. The first screen answers in seconds: who (JORDI BACARDIT), what (Game Production / Game Development, technical background), what for (open to internships and junior roles). No "Welcome to my portfolio". Then featured work and a way into About. The header logo and name link here.
-- `/about`: who I am, what I study, production focus plus technical background, the opportunities I'm after. Tech as a compact list grouped by category (engines, languages, web and data, tools). Primary action: the CV.
+- `/` Home. The first screen answers in seconds: who (JORDI BACARDIT), what (Game Design, backed by production and technical skills), what for (open to game design internships and junior roles). No "Welcome to my portfolio". Then the main projects (no prototypes) and a way into About. The header logo and name link here.
+- `/about`: who I am, what I study, the game design goal plus production and technical skills, the opportunities I'm after, and a Game Library block that links to `/game-library`. Tools as a compact list grouped by category (design & production, engines, languages, web and data, tools). Primary action: the CV.
 - `/work` and `/work/[slug]`: the most important section. Video game projects only.
-- `/game-library`: a personal, curated archive of games I play and that shaped me. Not a second portfolio and not a Steam-style store grid.
+- `/game-library`: a personal, curated archive of games I play and that shaped me. Not a second portfolio and not a Steam-style store grid. Not in the nav or footer: reached from About, with a "← Back to About" link at the top.
 - `/contact`: internships, junior roles, networking, collaboration. Not a freelance page (no services, no pricing). Email (mailto), LinkedIn, GitHub. No contact form unless I ask.
-- Nav: ABOUT, WORK, GAME LIBRARY, CONTACT, in that order. Active page marked with the accent and `aria-current="page"`. The CV is not in the nav: it lives in About and the footer.
+- Nav: ABOUT, WORK, CONTACT, in that order (Game Library left the nav and footer on 2026-10-02). Active page marked with the accent and `aria-current="page"`. The CV is not in the nav: it lives in About and the footer.
 - Footer: name, role line, nav links, LinkedIn, GitHub, CV, © year.
 
 ## Work
 
-My positioning is production, so project pages must show production thinking, not only code.
+My positioning is game design, so project pages must show design thinking (concept, decisions, playtesting, iteration), backed by production and technical notes, not only code.
 
-- Required fields: title, slug (file name), one-line summary, order. Status (prototype / in-development / complete → "Completed" / archived / upcoming) is expected but hidden while unknown.
-- Optional fields: year, role, team (solo, or size and disciplines), engine, type (course / personal / jam / TFG), dates (shown only without a year), technologies (plain list or `{ category, items }` groups), cover image and alt, trailer and gameplay clips (YouTube links, click-to-load via `YouTubeVideo.astro`, poster images are local), gallery (images or GIFs; GIFs are served unconverted to keep the animation), links (`build` usually itch.io, `steam`, `download`, `repo`, and `other` as label + url).
-- Projects are edited directly in their files (not in the CMS). Every project file carries the same full template: all fields present, empty ones hidden on the page. Sections are frontmatter fields rendered with fixed headings by the one shared template `src/pages/work/[slug].astro`, not a free Markdown body.
-- Page order: hero (title, summary, key facts in `ProjectMeta`, main links) → main visual (trailer if any, else cover) → Overview → My role (`responsibilities`: list or text, with role and team) → Development (`development[]`: title + description, any number) → Production (scope, planning, tools, what I cut and why, risks, what I'd do differently) → Challenges & solutions (`challenges[]`: title, challenge, solution) → Technical highlights (`highlights`: list or groups) → Technologies → Gameplay (extra clips only) → Screenshots (gallery: screenshots and GIFs) → Result → Links → previous/next.
+- Required fields: title, slug (file name), one-line summary, order. Status (prototype / in-development / complete → "Completed" / released → "Released" / archived / planned → "Planned") is expected but hidden while unknown.
+- Optional fields: year, role, team (size and disciplines; empty for solo), duration, engine, type (course / personal / jam / TFG), dates (shown as "Timeline", only without a year), `card` (shorter `summary` and `role` for the Home and Work cards), cover image and alt, trailer and gameplay clips (YouTube links, click-to-load via `YouTubeVideo.astro`, poster images are local), gallery (images or GIFs; GIFs are served unconverted to keep the animation), `sections`, `technicalNotes`, links (`build` usually itch.io, `steam`, `download`, `repo`, and `other` as label + url).
+- Projects are edited directly in their files (not in the CMS). Every project file carries the same full template: all fields present, empty ones hidden on the page. The case study is the file's own ordered `sections` list (changed 2026-10-02): each section has a title and any of `text`, `diagram` (steps, levers, caption: `ProgressionDiagram.astro`), `lists` (optional label + items; labelled lists sit side by side), `entries` (optional label + title + text) and `note`, all rendered by the one shared template `src/pages/work/[slug].astro`.
+- Page order: hero (title, summary, key facts in `ProjectMeta`, main links) → main visual (trailer if any, else cover) → the file's sections, in order → Gameplay (extra clips only) → Screenshots (gallery: screenshots and GIFs) → Technical notes → Links → previous/next.
+- Prototypes (status `prototype`) are listed apart: a small "Prototypes" section at the end of `/work` (`mini` cards), never on Home, never in previous/next, never with the "Case study in progress" badge.
 - A built project missing media or write-up shows a "Case study in progress" badge (`caseStudyInProgress()` in `src/lib/projects.ts`); it disappears once filled.
 
-Index: one featured project shown large, the rest secondary, never a grid of identical cards. Artwork and screenshots dominate; a card carries the title plus two or three metadata values, nothing more. Detail page: large hero image, one-line pitch, metadata as a `<dl>` beside the content on desktop, sections below, previous/next project navigation.
+Index: one featured project shown large, the rest secondary, never a grid of identical cards. Artwork and screenshots dominate; a card carries the title, its one-line text (`card.summary`, or the summary) and up to four metadata values (Status, Timeline, Role, Team, Engine: the ones that exist), nothing more. Detail page: large hero image, one-line pitch, metadata as a `<dl>` beside the content on desktop, sections below, previous/next project navigation.
 
 ## Game Library
 
@@ -118,7 +120,7 @@ Shows how I think about games as a medium. Entry fields: title, platforms, genre
 ## Copy
 
 - Site copy in English. Write "video game(s)" or "game(s)"; job titles as the industry writes them ("Producer", "Game Producer").
-- Hero: "Game Production / Game Development". It states my focus without claiming a title I haven't held yet.
+- Hero label: "Game Design" (`site.role`, also used in the header, footer, intro, home `<title>` and the OG image). It states my focus without claiming a title I haven't held yet.
 - Confident, concrete, specific: show what I built and decided, not adjectives about me. No clichés ("passionate developer", "hard-working student", "I've always loved video games"). No emoji.
 - Buttons say what happens: "Download CV (PDF)", "Email me", "View project".
 

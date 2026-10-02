@@ -16,6 +16,8 @@ const countLabel = (count: number) => `${count} ${count === 1 ? 'game' : 'games'
   description="A personal archive of the games I play and the games that shaped me."
 >
   <Container class="intro">
+    {/* Not in the main nav: the library is reached from About, so it links back there. */}
+    <a class="back" href="/about"><span aria-hidden="true">←</span>{" "}Back to About</a>
     <h1><SplitText text="Game Library." /></h1>
     <p class="lead">A personal archive of the games I play and the games that shaped me.</p>
   </Container>
@@ -165,6 +167,23 @@ const countLabel = (count: number) => `${count} ${count === 1 ? 'game' : 'games'
     display: grid;
     gap: var(--space-l);
     padding-block: var(--space-2xl) var(--space-xl);
+  }
+
+  /* Flex drops the space before the text, so the gap keeps the arrow apart. */
+  .back {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    justify-self: start;
+    min-height: var(--tap-min);
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+  }
+
+  .back:hover {
+    color: var(--color-accent);
   }
 
   .lead {

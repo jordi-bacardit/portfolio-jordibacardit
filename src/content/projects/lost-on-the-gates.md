@@ -2,32 +2,30 @@
 # Same template for every project. Empty fields are hidden on the site: fill one in and it appears.
 # Images: save them in src/assets/projects/lost-on-the-gates/ and write /src/assets/projects/lost-on-the-gates/<file>.
 # Videos: upload them to YouTube and paste the link.
-# Sources: the itch.io page (description, features, controls, status "Released"), the CV (My role)
-# and the screenshots. Team of two, personal project and role confirmed by Jordi on 2026-10-01.
-# TODO(content): year, the team's disciplines, what I did as Producer (for My role), gameplay video
-# (YouTube link), repo, and the Development / Production / Challenges sections.
+# Sources: Jordi's brief of 2026-10-02 (role, team split, design decisions, playtesting, production,
+# postmortem), the itch.io page and the screenshots.
+# TODO(content): year, gameplay video (YouTube link), repo.
 
 # Basics
 title: Lost On The Gates
-summary: A World War II tank survival game built in Unity with C#.
-status: complete # prototype | in-development | complete | archived | upcoming
+summary: "A World War II tank survival game: hold out against endless enemy waves for as long as you can."
+status: released # prototype | in-development | complete | released | archived | planned
 year: # e.g. 2026
 order: 1
 featured: true
 
-# Key facts (hero; up to three also appear on the card)
-role: Gameplay Programmer & Producer # e.g. Game Developer / Game Designer
-team: 2 people # Solo project, or size and disciplines
+# Key facts (hero)
+role: Game Designer & Producer # e.g. Game Designer, Solo developer
+team: 2 people # size and disciplines; empty for a solo project
+duration: 3 months (part-time)
 engine: Unity
 type: personal # course | personal | jam | tfg
-dates: # e.g. Sep 2025 – Jan 2026 (shown only when there's no year)
+dates: # shown as Timeline, only when there's no year
 
-# Technologies: a plain list, or grouped like
-#   - category: Programming
-#     items: [C#]
-technologies:
-  - C#
-  - WebGL
+# Home and Work cards: shorter text and role (the page's are used when empty)
+card:
+  summary: "A WWII tank survival game: hold out against endless enemy waves for as long as you can."
+  role:
 
 # Media
 cover: /src/assets/projects/lost-on-the-gates/07_gameplay_explosion.jpg
@@ -55,48 +53,92 @@ gallery: # screenshots or GIFs
   - image: /src/assets/projects/lost-on-the-gates/10_death_screen.png
     alt: "Death screen: You are dead, enemies destroyed: 17, with Play Again and Main Menu buttons."
 
-# Page sections (always in this order; empty ones are hidden)
-overview: | # 2–5 lines: what the game is, its goal, what you wanted to explore
-  Lost On The Gates is a 3D World War II tank survival game developed in Unity. The player takes control of a tank and survives against enemy forces while navigating the battlefield and engaging hostile units.
+# The case study: sections in this order. Each one has a title and any of
+#   text (paragraphs) · diagram · lists (- label + items) · entries (- label + title + text) · note
+sections:
+  - title: Overview
+    text: >-
+      Lost On The Gates is a 3D World War II tank survival game made in Unity by a team of two. You
+      command a tank on a fixed battlefield and fight enemy forces that keep arriving from three
+      points of the map. There is no way to win: the goal is to last as long as you can.
 
-  It was one of my first 3D game development projects, and it helped me explore the fundamentals of gameplay programming, enemy AI, navigation, combat systems and 3D level implementation.
-responsibilities: # a list (- item) or a short text
-  - Enemy AI.
-  - Turret aiming and shooting.
-  - Health and ammunition systems.
-  - Kill tracking.
-  - HUD.
-  - Scene flow.
-development: # one entry per important part of the development
-  # - title: Enemy AI
-  #   description: What you built and how.
-production: # scope, planning, tools, what you cut and why, risks, what you'd do differently
-challenges:
-  # - title: Enemy navigation
-  #   challenge: What the problem was.
-  #   solution: How you solved it.
-# Technical highlights: a plain list, or grouped like
-#   - category: AI
-#     items: [Enemy AI built on Unity's NavMeshAgent.]
-highlights:
-  - category: Gameplay
-    items:
-      - Tank movement, aiming and shooting.
-      - Turret systems.
-      - Survival-focused gameplay against enemy forces.
-  - category: Enemy AI
-    items:
-      - Enemy AI and navigation built on Unity's NavMeshAgent.
-  - category: UI and game flow
-    items:
-      - HUD with health and ammunition counters.
-      - Kill counter, shown on the death screen.
-      - Main menu, pause and death screens.
-  - category: Structure
-    items:
-      - Prefabs for the game's objects.
-result: | # factual: what was achieved and what kind of result it is (prototype, course project...)
-  Released on itch.io as a WebGL build that plays in the browser. Controls: WASD to move, mouse to aim, left mouse button to fire, Esc to pause.
+  - title: The concept
+    text: |
+      I wanted to make a game about a vehicle instead of the usual humanoid character, and to challenge myself to finish it in a limited time. I considered a 1v1 mode, but it didn't fit our schedule. Endless waves on a fixed map was the format that best fit both the idea and the time we had.
+
+      The setting had to give the tank survival idea a reason to exist. Holding out against endless waves reminded me of “The Last Tiger”, one of the War Stories in Battlefield V's campaign, so I went with World War II.
+
+  - title: My role
+    text: >-
+      I came up with the concept, designed the game and managed the project. I also built the
+      health, ammunition, HUD and scene systems, and helped my teammate build the tank and the
+      enemies.
+    lists:
+      - label: What I did
+        items:
+          - Concept and game design
+          - "Planning and coordination: tasks in Trello, version control on GitHub, regular check-ins with my teammate"
+          - Health and ammunition systems
+          - Kill tracking
+          - HUD
+          - "Scene flow: main menu, pause and death screens, and the transitions between them"
+          - Sound integration
+          - Lighting and atmosphere
+          - Playtesting sessions with friends
+          - Release on itch.io and the trailer
+          - Helped build the tank and the enemy system
+      - label: What my teammate did
+        items:
+          - Led the tank setup (movement and turret)
+          - "Led the enemy system: AI, navigation and spawning"
+    note: The battlefield map comes from a third-party asset pack.
+
+  - title: Key design decisions
+    entries:
+      - title: Endless waves on a fixed map
+        text: One map and one loop that can be replayed forever. It fit a short schedule, and the challenge comes from enemy pressure instead of content.
+      - title: Random spawns
+        text: Enemies appear at three points of the map, at random and in random numbers, so every run plays out differently.
+      - title: Limited ammunition
+        text: "We didn't want the player to be invincible. Every run ends in death; the question is how long you can hold out, and limited ammo is part of that pressure."
+      - title: Minimal HUD
+        text: "Only the essentials: health and ammunition during play, and your kill count on the death screen. Simple and clean."
+
+  - title: Playtesting & iteration
+    text: "We ran several playtests with friends and changed the game based on what we saw, including:"
+    lists:
+      - items:
+          - The crosshair
+          - Tank movement
+          - Enemy navigation (NavMesh)
+          - A darker atmosphere
+
+  - title: Production
+    lists:
+      - items:
+          - 3 months, part-time, alongside other commitments.
+          - Trello for tasks, GitHub for version control and WhatsApp for day-to-day communication.
+          - We met almost every day to review what we'd done and what came next. When we couldn't meet, we kept each other updated.
+    entries:
+      - title: Scope cut
+        text: I wanted to add multiplayer, to play with friends and add some competition, but it didn't fit the schedule, so we cut it.
+
+  - title: Postmortem
+    lists:
+      - label: What went well
+        items:
+          - The core idea worked, and I'm happy with the result.
+      - label: What I'd do differently
+        items:
+          - Better planning, or a different split of tasks, would have let us finish sooner.
+          - Difficulty is fixed. I'd add a round system with different advantages to choose from.
+          - Better tank models and more natural enemy AI.
+
+# Short closing notes, shown at the end next to the links
+technicalNotes: |
+  WebGL build on itch.io. Enemy navigation uses Unity's NavMeshAgent (led by my teammate), and the game is built on prefabs.
+
+  Controls: WASD to move, mouse to aim, left mouse button to fire, Esc to pause.
 
 # Links (only the ones you fill in are shown)
 links:

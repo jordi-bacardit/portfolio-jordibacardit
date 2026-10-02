@@ -1,11 +1,12 @@
 ---
 import Container from '../../components/Container.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
 import ProjectList from '../../components/ProjectList.astro';
 import SplitText from '../../components/SplitText.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getProjects } from '../../lib/projects';
+import { getProjectGroups } from '../../lib/projects';
 
-const projects = await getProjects();
+const { main, prototypes } = await getProjectGroups();
 ---
 
 <BaseLayout
@@ -19,8 +20,21 @@ const projects = await getProjects();
         Video game projects built in Unity and Unreal Engine, plus my upcoming Final Degree Project.
       </p>
     </div>
-    <ProjectList projects={projects} eager />
+    <ProjectList projects={main} eager />
   </Container>
+
+  {
+    prototypes.length > 0 && (
+      <Container as="section" class="prototypes" aria-labelledby="prototypes-title">
+        <h2 id="prototypes-title">Prototypes.</h2>
+        <div class="prototype-grid">
+          {prototypes.map((project) => (
+            <ProjectCard project={project} size="mini" headingLevel={3} />
+          ))}
+        </div>
+      </Container>
+    )
+  }
 </BaseLayout>
 
 <style>
@@ -38,6 +52,23 @@ const projects = await getProjects();
   .lead {
     color: var(--color-text-muted);
     font-size: var(--text-lg);
+  }
+
+  /* Smaller and quieter than the main grid: a heading and one row of cards. */
+  .prototypes {
+    display: grid;
+    gap: var(--space-xl);
+    padding-top: var(--space-3xl);
+  }
+
+  .prototypes h2 {
+    font-size: var(--text-2xl);
+  }
+
+  .prototype-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+    gap: var(--space-m);
   }
 
   @media (min-width: 64em) {

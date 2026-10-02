@@ -2,32 +2,31 @@
 # Same template for every project. Empty fields are hidden on the site: fill one in and it appears.
 # Images: save them in src/assets/projects/finn-adventure/ and write /src/assets/projects/finn-adventure/<file>.
 # Videos: upload them to YouTube and paste the link.
-# Sources: the itch.io page (description, features, controls, status "Released"), the trailer and the
-# screenshots. Solo and personal project confirmed by Jordi on 2026-10-02.
-# TODO(content): year, role title, gameplay video (YouTube link), repo,
-# and the Development / Production / Challenges sections.
+# Sources: Jordi's brief of 2026-10-02 (role, duration, level design, boss, what I'd change), the
+# itch.io page (controls, WebGL build), the trailer and the screenshots. The game has a single
+# checkpoint: don't mention checkpoints.
+# TODO(content): year, gameplay video (YouTube link), repo.
 
 # Basics
 title: Finn Adventure
-summary: "A 2D pixel platformer built in Unity with C#: three levels of obstacles and enemies, and a final boss."
-status: complete # prototype | in-development | complete | archived | upcoming
+summary: "My first game: a 2D pixel platformer made solo in Unity, with three levels and a final boss."
+status: released # prototype | in-development | complete | released | archived | planned
 year: # e.g. 2026
 order: 2
 featured: false
 
-# Key facts (hero; up to three also appear on the card)
-role: # e.g. Game Developer / Game Designer
-team: Solo project # Solo project, or size and disciplines
+# Key facts (hero)
+role: Solo developer (design, programming, level design) # e.g. Game Designer, Solo developer
+team: # size and disciplines; empty for a solo project
+duration: 1.5 months
 engine: Unity
 type: personal # course | personal | jam | tfg
-dates: # e.g. Sep 2025 – Jan 2026 (shown only when there's no year)
+dates: # shown as Timeline, only when there's no year
 
-# Technologies: a plain list, or grouped like
-#   - category: Programming
-#     items: [C#]
-technologies:
-  - C#
-  - WebGL
+# Home and Work cards: shorter text and role (the page's are used when empty)
+card:
+  summary: "My first game: a 2D pixel platformer with three levels and a final boss, made solo."
+  role: Solo developer
 
 # Media
 cover: /src/assets/projects/finn-adventure/thumbnail.jpg
@@ -41,7 +40,7 @@ gallery: # screenshots or GIFs
   - image: /src/assets/projects/finn-adventure/02_level1_strawberry.png
     alt: Finn jumping towards a strawberry above a red mushroom enemy in the first level; the HUD shows 0/4 fruit and three hearts.
   - image: /src/assets/projects/finn-adventure/03_checkpoint.png
-    alt: Finn next to a checkpoint flag at the top of some grass steps, with a banana on a floating platform.
+    alt: Finn next to a flag pole at the top of some grass steps, with a banana on a floating platform.
   - image: /src/assets/projects/finn-adventure/04_stomp_and_bird.png
     alt: Finn in mid-jump above a puff of dust while a blue bird flies ahead; the HUD shows 1/4 fruit.
   - image: /src/assets/projects/finn-adventure/05_floating_platforms.png
@@ -61,45 +60,51 @@ gallery: # screenshots or GIFs
   - image: /src/assets/projects/finn-adventure/11_victory.png
     alt: "Victory screen: You win!!, with Exit and Menu buttons over a mountain landscape."
 
-# Page sections (always in this order; empty ones are hidden)
-overview: | # 2–5 lines: what the game is, its goal, what you wanted to explore
-  Finn Adventure is a 2D platformer developed in Unity and my first video game project. Inspired by classic platformers such as Mario, the game follows Finn through three levels filled with obstacles and enemies, culminating in a final boss encounter.
+# The case study: sections in this order. Each one has a title and any of
+#   text (paragraphs) · diagram · lists (- label + items) · entries (- label + title + text) · note
+sections:
+  - title: Overview
+    text: >-
+      Finn Adventure was the first game I ever made. Inspired by classic platformers like Super
+      Mario, it follows Finn through three levels of obstacles and enemies, ending in a boss fight.
+      It's simple, and it shows it was made by a beginner, but it's where everything started and
+      I'm proud to keep it here.
 
-  The project was my introduction to game development and allowed me to explore the fundamentals of Unity, 2D gameplay programming, player movement, enemy mechanics, level design and boss encounters.
-responsibilities: # a list (- item) or a short text
-  - Gameplay programming in C#.
-  - Player movement and jumping.
-  - Enemies and the jump-to-defeat mechanic.
-  - Level design for the three levels.
-  - The final boss fight.
-  - Menus and HUD.
-development: # one entry per important part of the development
-  # - title: Player movement
-  #   description: What you built and how.
-production: # scope, planning, tools, what you cut and why, risks, what you'd do differently
-challenges:
-  # - title: Boss fight
-  #   challenge: What the problem was.
-  #   solution: How you solved it.
-# Technical highlights: a plain list, or grouped like
-#   - category: Gameplay
-#     items: [Jump-to-defeat enemy mechanic.]
-highlights:
-  - category: Gameplay
-    items:
-      - 2D platforming with player movement and jumping.
-      - Jump-to-defeat enemy mechanic.
-      - Final boss fight.
-  - category: Levels
-    items:
-      - Three playable levels with obstacles and enemies.
-      - Level progression, with checkpoints.
-  - category: UI and game flow
-    items:
-      - HUD with a fruit counter and three hearts.
-      - Main menu, pause, game over and victory screens.
-result: | # factual: what was achieved and what kind of result it is (prototype, course project...)
-  Released on itch.io as a WebGL build that plays in the browser. Controls: A and D to move, Space to jump.
+  - title: Level design & difficulty
+    text: >-
+      Difficulty grows through the layout of each level rather than through new mechanics: harder
+      jumps, obstacles where you have to wait for the right moment to cross, and more enemies.
+    diagram:
+      steps: [Level 1, Level 2, Level 3, Boss]
+      levers: [Harder jumps, Timing, More enemies]
+      caption: Retrospective overview, made after the project.
+
+  - title: The boss
+    text: >-
+      The levels teach one thing above all: patience, waiting for the right moment to move. The
+      boss puts that to the test: every time you hit it, it gets faster.
+
+  - title: My role
+    lists:
+      - items:
+          - Gameplay programming in C#.
+          - Player movement and jumping.
+          - Enemies and the jump-to-defeat mechanic.
+          - Level design for the three levels.
+          - The final boss fight.
+          - Menus and HUD.
+
+  - title: What I'd change now
+    text: >-
+      Quite a lot: the level layouts, the enemies and, above all, the overall level design. Looking
+      back, it's clearly the work of a beginner, and that's exactly why it's useful to see how far
+      I've come.
+
+# Short closing notes, shown at the end next to the links
+technicalNotes: |
+  Released on itch.io as a WebGL build that plays in the browser.
+
+  Controls: A and D to move, Space to jump.
 
 # Links (only the ones you fill in are shown)
 links:
