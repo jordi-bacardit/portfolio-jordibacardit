@@ -1,6 +1,6 @@
 // Personal info and links: the single source of truth for the whole site.
-// Unknown values stay null with a TODO(content) note. Components hide them where
-// they are optional and show a visible [TODO] placeholder where they are required.
+// Unknown values stay null with a TODO(content) note, and the pages hide what's missing
+// (no [TODO] placeholders on the live site since 2026-10-01).
 
 export interface NavItem {
   label: string;
@@ -24,6 +24,8 @@ export const site = {
   languages: 'Catalan and Spanish (native), English (advanced)',
   lookingFor: 'Open to game design internships and junior roles in the European games industry',
   status: 'Open to internships and junior roles',
+  // The line that opens the Contact page and the village's Contact panel.
+  contactPitch: 'Open to internships, junior roles, networking and collaboration in game design.',
   email: 'jordibacardit12@gmail.com' as string | null,
   linkedin: 'https://www.linkedin.com/in/jordi-bacardit/' as string | null,
   github: 'https://github.com/jordi-bacardit' as string | null,

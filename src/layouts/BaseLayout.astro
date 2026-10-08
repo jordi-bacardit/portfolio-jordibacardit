@@ -14,11 +14,13 @@ interface Props {
   description: string;
   /** Root-relative or absolute URL of the Open Graph image. */
   image?: string;
-  /** Play the name intro (once per session). Home page only. */
+  /** Show the gate: the name intro that becomes the Play/Read menu (once per session). Home only. */
   intro?: boolean;
+  /** Full-screen page without the site header and footer (the 3D village at /play). */
+  bare?: boolean;
 }
 
-const { title, description, image, intro = false } = Astro.props;
+const { title, description, image, intro = false, bare = false } = Astro.props;
 
 const fullTitle = title ? `${title} — ${site.name}` : `${site.name} — ${site.role}`;
 const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : undefined;
@@ -38,13 +40,20 @@ const ogImageIsDefault = !image;
     {
       intro && (
         <script is:inline>
+          // The gate opens whenever the site is opened (typed, a link from elsewhere, a new tab, a
+          // reload), not when moving within it (the logo, Read in /play, the back button).
           try {
-            if (
-              !matchMedia('(prefers-reduced-motion: reduce)').matches &&
-              !sessionStorage.getItem('intro-seen')
-            ) {
-              sessionStorage.setItem('intro-seen', '1');
-              document.documentElement.classList.add('intro-play');
+            var navigation = performance.getEntriesByType('navigation')[0];
+            var type = navigation ? navigation.type : 'navigate';
+            var fromSite = false;
+            try {
+              fromSite = new URL(document.referrer).origin === location.origin;
+            } catch (error) {}
+            if (type === 'reload' || (type === 'navigate' && !fromSite)) {
+              document.documentElement.classList.add('gate-open');
+              if (localStorage.getItem('gate-visited')) {
+                document.documentElement.classList.add('gate-quick');
+              }
             }
           } catch (error) {}
         </script>
@@ -85,12 +94,12 @@ const ogImageIsDefault = !image;
   <body>
     {intro && <Intro />}
     <a class="skip-link" href="#main">Skip to content</a>
-    <Header />
+    {!bare && <Header />}
     <main id="main">
       <slot />
     </main>
-    <Footer />
-    <Effects />
+    {!bare && <Footer />}
+    <Effects cursor={!bare} />
   </body>
 </html>
 

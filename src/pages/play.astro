@@ -1,0 +1,1103 @@
+---
+// The 3D village. The world (src/scripts/play/) is drawn into the stage, loaded on demand when
+// the browser supports WebGL. Everything to read (the quest board and the panels) is HTML built
+// from the same project files and site data as the classic portfolio, so adding a project adds it
+// here too, and it all works even without the 3D world.
+import { getImage, Image } from 'astro:assets';
+import portrait from '../assets/jordi-portrait.png';
+import Button from '../components/Button.astro';
+import CategoryList from '../components/CategoryList.astro';
+import PlayDialog from '../components/PlayDialog.astro';
+import ProjectMeta from '../components/ProjectMeta.astro';
+import YouTubeVideo from '../components/YouTubeVideo.astro';
+import { playCredits } from '../data/credits';
+import { site, technologies } from '../data/site';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getProjectGroups, projectLinks, statusLabels, type Project } from '../lib/projects';
+
+const { main, prototypes } = await getProjectGroups();
+const statusOf = (project: Project) => project.data.status && statusLabels[project.data.status];
+
+// Where each thing is in the village (see src/scripts/play/places.ts).
+const hall = 'In the Hall of Works';
+
+// The quest board lists every place in the village, grouped.
+const board = [
+  {
+    heading: 'Projects',
+    places: main.map((project) => ({
+      id: `project-${project.id}`,
+      title: project.data.title,
+      note: statusOf(project),
+      where: hall,
+    })),
+  },
+  {
+    heading: 'Prototypes',
+    places: prototypes.map((project) => ({
+      id: `project-${project.id}`,
+      title: project.data.title,
+      note: statusOf(project),
+      where: hall,
+    })),
+  },
+  {
+    heading: 'Village',
+    places: [
+      { id: 'about', title: 'About', note: undefined, where: 'In the Old Library' },
+      { id: 'skills', title: 'Skills', note: undefined, where: 'In the Smithy' },
+      { id: 'contact', title: 'Contact', note: undefined, where: 'In the Rusty Tankard' },
+    ],
+  },
+].filter((group) => group.places.length > 0);
+
+// What the 3D village shows (frames, portrait, boards): the same project files and site data,
+// with images resized for textures.
+const texture = async (src: ImageMetadata, width: number) => (await getImage({ src, width, format: 'webp' })).src;
+const content = {
+  name: site.name,
+  role: site.role,
+  portrait: await texture(portrait, 512),
+  projects: await Promise.all(
+    [...main, ...prototypes].map(async (project) => ({
+      panel: `project-${project.id}`,
+      title: project.data.title,
+      status: statusOf(project),
+      summary: project.data.summary,
+      cover: project.data.cover ? await texture(project.data.cover, 960) : undefined,
+    })),
+  ),
+  tools: technologies,
+  contact: {
+    lookingFor: site.lookingFor,
+    email: site.email,
+    linkedin: site.linkedin,
+    github: site.github,
+    based: `Based in ${site.location}${site.openToRelocation ? ', open to relocation' : ''}.`,
+  },
+};
+---
+
+<BaseLayout
+  title="Play"
+  description="Jordi Bacardit's portfolio as a small medieval village in 3D: every project is a place you can walk to."
+  bare
+>
+  <div class="play">
+    <div class="stage" data-stage data-content={JSON.stringify(content)}></div>
+
+    <div class="hud">
+      <Button href="/">Read<span class="visually-hidden"> the classic portfolio</span></Button>
+      <div class="hud-end">
+        <Button aria-pressed="false" data-sound hidden>
+          Sound<span class="sound-state" aria-hidden="true" data-sound-state>off</span>
+        </Button>
+        <Button data-open="quests">Quest board</Button>
+      </div>
+    </div>
+
+    <div class="vignette" aria-hidden="true"></div>
+
+    <p class="region" aria-live="polite" data-region></p>
+    <p class="look-prompt" data-look-prompt hidden>Click to look around</p>
+
+    <!-- The touch stick: appears where the thumb lands on the left half of the screen. -->
+    <div class="stick-zone" data-stick hidden>
+      <span class="stick-base" data-stick-base><span class="stick-knob" data-stick-knob></span></span>
+    </div>
+
+    <div class="speech" data-speech hidden>
+      <p class="speech-name" data-speech-name></p>
+      <p class="speech-line" data-speech-line></p>
+    </div>
+    <p class="visually-hidden" aria-live="polite" data-speech-announce></p>
+
+    <button type="button" class="talk" data-talk hidden>
+      <kbd>E</kbd><span data-talk-name>Talk</span>
+    </button>
+
+    <ul class="keys" role="list" aria-label="Controls" data-keys hidden>
+      <li><kbd>Mouse</kbd> Look</li>
+      <li><kbd>WASD</kbd> Move</li>
+      <li><kbd>Shift</kbd> Walk</li>
+      <li><kbd>E</kbd> Talk or use</li>
+      <li><kbd>Alt</kbd> Cursor</li>
+      <li><kbd>M</kbd> Sound</li>
+      <li><kbd>Q</kbd> Quest board</li>
+    </ul>
+
+    <div class="welcome" data-welcome data-state="idle">
+      <section class="card" aria-labelledby="play-title">
+        <h1 id="play-title">The village.</h1>
+        <p class="lead">
+          My portfolio as a small medieval village at dusk: every project is a place you can walk
+          to.
+        </p>
+        <div class="loading" data-loading hidden>
+          <div
+            class="bar"
+            role="progressbar"
+            aria-label="Loading the village"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-valuenow="0"
+            data-progress
+          >
+            <span class="fill" data-progress-fill></span>
+          </div>
+          <p class="loading-text" data-progress-text>Loading the village</p>
+        </div>
+        <dl class="controls" data-controls="mouse" hidden>
+          <div>
+            <dt>Move</dt>
+            <dd>WASD or arrow keys</dd>
+          </div>
+          <div>
+            <dt>Walk</dt>
+            <dd>Hold Shift</dd>
+          </div>
+          <div>
+            <dt>Look around</dt>
+            <dd>Move the mouse</dd>
+          </div>
+          <div>
+            <dt>Talk or use</dt>
+            <dd>E, next to someone or something</dd>
+          </div>
+          <div>
+            <dt>Use the cursor</dt>
+            <dd>Press Alt</dd>
+          </div>
+          <div>
+            <dt>Sound</dt>
+            <dd>M</dd>
+          </div>
+          <div>
+            <dt>Quest board</dt>
+            <dd>Q</dd>
+          </div>
+        </dl>
+        <dl class="controls" data-controls="touch" hidden>
+          <div>
+            <dt>Move</dt>
+            <dd>Drag on the left side</dd>
+          </div>
+          <div>
+            <dt>Look around</dt>
+            <dd>Drag on the right side</dd>
+          </div>
+          <div>
+            <dt>Talk or use</dt>
+            <dd>Tap the prompt that appears</dd>
+          </div>
+        </dl>
+        <p class="notice" data-support-notice hidden></p>
+        <noscript>
+          <p class="notice">The village needs JavaScript. The classic portfolio works without it.</p>
+        </noscript>
+        <div class="actions">
+          <Button variant="primary" data-start hidden>Enter the village</Button>
+          <Button data-open="quests">Open the quest board</Button>
+          <Button href="/">Read the classic portfolio</Button>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <PlayDialog id="quests" title="Quest board">
+    {
+      board.map((group) => (
+        <section class="board-group" aria-labelledby={`board-${group.heading.toLowerCase()}`}>
+          <h3 id={`board-${group.heading.toLowerCase()}`} class="board-heading">
+            {group.heading}
+          </h3>
+          <ul role="list" class="quests">
+            {group.places.map((place) => (
+              <li>
+                <button type="button" class="quest" data-open={place.id}>
+                  <span class="quest-title">{place.title}</span>
+                  {place.note && <span class="quest-note">{place.note}</span>}
+                  <span class="quest-where">{place.where}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))
+    }
+    <div class="board-footer">
+      <Button data-open="credits">Credits</Button>
+    </div>
+  </PlayDialog>
+
+  <PlayDialog id="credits" title="Credits">
+    <p>The village is built with free assets. Thank you to their authors.</p>
+    <ul role="list" class="credits">
+      {
+        playCredits.map((credit) => (
+          <li>
+            <p class="credit-name">
+              <a href={credit.url}>{credit.name}</a>
+            </p>
+            <p class="credit-meta">
+              {credit.author}, {credit.licence}. {credit.used}.
+            </p>
+          </li>
+        ))
+      }
+    </ul>
+  </PlayDialog>
+
+  {
+    [...main, ...prototypes].map((project) => {
+      const { title, summary, cover, coverAlt, trailer, trailerPoster, gallery, links } =
+        project.data;
+      const actions = projectLinks(links);
+      // A few stills, not the whole gallery (GIFs stay on the case study page).
+      const shots = (gallery ?? []).filter((shot) => shot.image.format !== 'gif').slice(0, 4);
+      return (
+        <PlayDialog id={`project-${project.id}`} title={title}>
+          <p class="pitch">{summary}</p>
+          <ProjectMeta project={project.data} />
+          {trailer ? (
+            <YouTubeVideo url={trailer} title={`${title} trailer`} poster={trailerPoster ?? cover} />
+          ) : (
+            cover && (
+              <Image
+                src={cover}
+                alt={coverAlt ?? ''}
+                widths={[480, 800, 1200]}
+                sizes="(min-width: 56rem) 50rem, 100vw"
+                class="media"
+              />
+            )
+          )}
+          {shots.length > 0 && (
+            <ul role="list" class="shots">
+              {shots.map((shot) => (
+                <li>
+                  <Image
+                    src={shot.image}
+                    alt={shot.alt}
+                    widths={[320, 640]}
+                    sizes="(min-width: 56rem) 12rem, 50vw"
+                    class="shot"
+                  />
+                </li>
+              ))}
+            </ul>
+          )}
+          <div class="actions">
+            <Button href={`/work/${project.id}`} variant="primary">
+              Read the case study
+            </Button>
+            {actions.map((link) => (
+              <Button href={link.href}>{link.label}</Button>
+            ))}
+          </div>
+        </PlayDialog>
+      );
+    })
+  }
+
+  <PlayDialog id="about" title="About">
+    <p class="pitch">
+      I'm {site.name}, a {site.study.degree} student at {site.study.school}, {site.study.country},
+      working towards a career in game design.
+    </p>
+    <p>{site.lookingFor}.</p>
+    <div class="actions">
+      <Button href="/about" variant="primary">Read more about me</Button>
+      {
+        site.cv && (
+          <Button href={site.cv} download>
+            Download CV (PDF)
+          </Button>
+        )
+      }
+    </div>
+  </PlayDialog>
+
+  <PlayDialog id="skills" title="Skills">
+    <CategoryList groups={technologies} variant="rows" />
+  </PlayDialog>
+
+  <PlayDialog id="contact" title="Contact">
+    <p class="pitch">{site.contactPitch}</p>
+    {site.email && <p class="email">{site.email}</p>}
+    <div class="actions">
+      {
+        site.email && (
+          <Button href={`mailto:${site.email}`} variant="primary">
+            Email me
+          </Button>
+        )
+      }
+      {site.linkedin && <Button href={site.linkedin}>LinkedIn</Button>}
+      {site.github && <Button href={site.github}>GitHub</Button>}
+      {
+        site.cv && (
+          <Button href={site.cv} download>
+            Download CV (PDF)
+          </Button>
+        )
+      }
+    </div>
+  </PlayDialog>
+</BaseLayout>
+
+<script>
+  import { prefersReducedMotion, supportsWebGL } from '../scripts/support';
+
+  const panels = new Map(
+    [...document.querySelectorAll<HTMLDialogElement>('[data-panel]')].map((panel) => [
+      panel.id,
+      panel,
+    ]),
+  );
+  let current: HTMLDialogElement | null = null;
+
+  // Set once the village is running: panels free the mouse while they're open.
+  let village: { release(): void; look(): void; interact(): void; sound(on: boolean): void } | null = null;
+  let playing = false;
+
+  // One panel at a time: opening a place from the quest board replaces the board.
+  const open = (id: string) => {
+    const panel = panels.get(id);
+    if (!panel) return;
+    village?.release();
+    if (current?.open && current !== panel) current.close();
+    if (!panel.open) panel.showModal();
+    current = panel;
+  };
+
+  document.addEventListener('click', (event) => {
+    const target = event.target as Element | null;
+    const opener = target?.closest<HTMLElement>('[data-open]');
+    if (opener?.dataset.open) {
+      open(opener.dataset.open);
+      return;
+    }
+    target?.closest('[data-close]')?.closest('dialog')?.close();
+  });
+
+  panels.forEach((panel) => {
+    // A click on the backdrop (outside the panel's content) closes it.
+    panel.addEventListener('click', (event) => {
+      if (event.target === panel) panel.close();
+    });
+    // Closing stops a playing trailer: its player reloads without autoplay.
+    panel.addEventListener('close', () => {
+      panel.querySelectorAll('iframe').forEach((frame) => {
+        frame.src = frame.src.replace('autoplay=1', 'autoplay=0');
+      });
+    });
+  });
+
+  const welcome = document.querySelector<HTMLElement>('[data-welcome]');
+  const notice = document.querySelector<HTMLElement>('[data-support-notice]');
+  const loading = document.querySelector<HTMLElement>('[data-loading]');
+  const progress = document.querySelector<HTMLElement>('[data-progress]');
+  const progressFill = document.querySelector<HTMLElement>('[data-progress-fill]');
+  const progressText = document.querySelector<HTMLElement>('[data-progress-text]');
+  const startButton = document.querySelector<HTMLButtonElement>('[data-start]');
+  const keys = document.querySelector<HTMLElement>('[data-keys]');
+  const lookPrompt = document.querySelector<HTMLElement>('[data-look-prompt]');
+  const regionBanner = document.querySelector<HTMLElement>('[data-region]');
+  const stick = document.querySelector<HTMLElement>('[data-stick]');
+  const talkButton = document.querySelector<HTMLButtonElement>('[data-talk]');
+  const talkName = document.querySelector<HTMLElement>('[data-talk-name]');
+  const speech = document.querySelector<HTMLElement>('[data-speech]');
+  const speechName = document.querySelector<HTMLElement>('[data-speech-name]');
+  const speechLine = document.querySelector<HTMLElement>('[data-speech-line]');
+  const speechAnnounce = document.querySelector<HTMLElement>('[data-speech-announce]');
+  const soundButton = document.querySelector<HTMLButtonElement>('[data-sound]');
+  const soundState = document.querySelector<HTMLElement>('[data-sound-state]');
+  const fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  const touch = window.matchMedia('(hover: none)').matches;
+  const controls = document.querySelector<HTMLElement>(`[data-controls="${touch ? 'touch' : 'mouse'}"]`);
+
+  // "Click to look around" while playing with a mouse and the cursor is free (after Esc or Alt).
+  const showLook = (looking: boolean) => {
+    if (lookPrompt) lookPrompt.hidden = looking || !playing || !fine || Boolean(document.querySelector('dialog[open]'));
+  };
+
+  // A place name fades in and out when the adventurer walks into it, like a game's area title.
+  let regionTimer = 0;
+  const showRegion = (name: string) => {
+    if (!regionBanner) return;
+    regionBanner.textContent = name;
+    regionBanner.classList.remove('is-shown');
+    void regionBanner.offsetWidth;
+    regionBanner.classList.add('is-shown');
+    window.clearTimeout(regionTimer);
+    regionTimer = window.setTimeout(() => regionBanner.classList.remove('is-shown'), 3200);
+  };
+
+  panels.forEach((panel) => panel.addEventListener('close', () => showLook(false)));
+
+  // Q opens the quest board while walking around; E talks to whoever is near.
+  window.addEventListener('keydown', (event) => {
+    if (!playing || event.repeat || document.querySelector('dialog[open]')) return;
+    if (event.code === 'KeyQ') {
+      event.preventDefault();
+      open('quests');
+    } else if (event.code === 'KeyE') {
+      event.preventDefault();
+      village?.interact();
+    } else if (event.code === 'KeyM') {
+      // The Sound button needs a free cursor (Alt); M works while looking around.
+      event.preventDefault();
+      setSound(soundButton?.getAttribute('aria-pressed') !== 'true');
+    }
+  });
+
+  // Talking and using things: a prompt while someone or something is within reach ("Talk to the
+  // smith", "View Finn Adventure"; a button for touch), then what people say in a box at the
+  // bottom for a few seconds.
+  let speechTimer = 0;
+  const hideSpeech = () => {
+    window.clearTimeout(speechTimer);
+    if (speech) speech.hidden = true;
+  };
+  const showPrompt = (label: string | null) => {
+    if (talkName && label) talkName.textContent = label;
+    if (talkButton) talkButton.hidden = !label;
+    if (!label) hideSpeech();
+  };
+  const say = (name: string, line: string) => {
+    if (!speech || !speechName || !speechLine) return;
+    speechName.textContent = name;
+    speechLine.textContent = line;
+    speech.hidden = false;
+    if (speechAnnounce) speechAnnounce.textContent = `${name}: ${line}`;
+    window.clearTimeout(speechTimer);
+    speechTimer = window.setTimeout(hideSpeech, 7000);
+  };
+  talkButton?.addEventListener('click', () => village?.interact());
+
+  // Sound: off unless the visitor turned it on before (remembered on this device).
+  const readSound = () => {
+    try {
+      return localStorage.getItem('village-sound') === 'on';
+    } catch {
+      return false;
+    }
+  };
+  const setSound = (on: boolean) => {
+    village?.sound(on);
+    soundButton?.setAttribute('aria-pressed', String(on));
+    if (soundState) soundState.textContent = on ? 'on' : 'off';
+    try {
+      localStorage.setItem('village-sound', on ? 'on' : 'off');
+    } catch {}
+  };
+  soundButton?.addEventListener('click', () => setSound(soundButton.getAttribute('aria-pressed') !== 'true'));
+
+  const tell = (text: string) => {
+    if (!notice) return;
+    notice.hidden = false;
+    notice.textContent = text;
+  };
+
+  const showProgress = (fraction: number) => {
+    const percent = Math.round(fraction * 100);
+    progress?.setAttribute('aria-valuenow', String(percent));
+    progressFill?.style.setProperty('--progress', String(fraction));
+    if (progressText) progressText.textContent = `Loading the village ${percent}%`;
+  };
+
+  if (!supportsWebGL()) {
+    tell("This browser can't run the 3D village. The quest board and the classic portfolio still work.");
+  } else {
+    if (prefersReducedMotion()) {
+      tell('The village has camera movement. The classic portfolio may be more comfortable.');
+    }
+    if (loading) loading.hidden = false;
+    if (welcome) welcome.dataset.state = 'loading';
+    showProgress(0);
+    const stage = document.querySelector<HTMLElement>('[data-stage]');
+
+    // three.js and the models only download now, on this page.
+    import('../scripts/play/game')
+      .then(({ loadGame }) =>
+        loadGame({
+          stage: stage ?? document.body,
+          stick: touch ? stick : null,
+          content: JSON.parse(stage?.dataset.content ?? '{}'),
+          onProgress: showProgress,
+          isBlocked: () => Boolean(document.querySelector('dialog[open]')),
+          onLook: showLook,
+          onRegion: showRegion,
+          onPrompt: showPrompt,
+          onSay: say,
+          onOpen: open,
+        }),
+      )
+      .then((game) => {
+        if (loading) loading.hidden = true;
+        if (controls) controls.hidden = false;
+        if (welcome) welcome.dataset.state = 'ready';
+        village = game;
+        if (startButton) {
+          startButton.hidden = false;
+          startButton.focus();
+          startButton.addEventListener('click', () => {
+            playing = true;
+            game.start();
+            if (welcome) welcome.dataset.state = 'playing';
+            if (keys) keys.hidden = !fine;
+            if (stick) stick.hidden = !touch;
+            if (soundButton) soundButton.hidden = false;
+            // The click is the gesture browsers need to start audio.
+            if (readSound()) setSound(true);
+            showLook(false);
+            // Keys now steer the adventurer instead of the focused button.
+            startButton.blur();
+          });
+        }
+        // Leaving the page frees the GPU memory; coming back from the cache reloads it.
+        window.addEventListener('pagehide', () => game.dispose(), { once: true });
+        window.addEventListener('pageshow', (event) => {
+          if (event.persisted) window.location.reload();
+        });
+      })
+      .catch((error) => {
+        console.error(error);
+        if (loading) loading.hidden = true;
+        if (welcome) welcome.dataset.state = 'idle';
+        tell("The village couldn't load. The quest board and the classic portfolio still work.");
+      });
+  }
+</script>
+
+<style>
+  .play {
+    position: relative;
+    display: grid;
+    min-height: 100svh;
+  }
+
+  /* The panels open with JavaScript: without it, their buttons would do nothing. */
+  :global(.no-js [data-open]) {
+    display: none;
+  }
+
+  /* The 3D world fills the screen behind everything. */
+  .stage {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background: var(--color-bg);
+  }
+
+  .stage :global(.village-canvas) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+  }
+
+  .hud {
+    position: fixed;
+    top: var(--space-m);
+    right: var(--gutter);
+    left: var(--gutter);
+    z-index: 2;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-s);
+    pointer-events: none;
+  }
+
+  .hud-end {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--space-xs) var(--space-s);
+  }
+
+  @media (max-width: 30em) {
+    .hud :global(.button) {
+      padding-inline: var(--space-s);
+    }
+  }
+
+  /* A dark backing so the buttons stay readable over bright roofs and fire. */
+  .hud :global(.button) {
+    pointer-events: auto;
+    background: var(--color-scrim);
+  }
+
+  .hud :global(.button[aria-pressed='true']) {
+    border-color: var(--color-accent);
+  }
+
+  /* The button is a flex box, so a leading space in the span would collapse. */
+  .sound-state {
+    margin-left: 0.6em;
+  }
+
+  /* Start screen: like a game's title screen, the card on a dark veil and the village alive
+     behind it (on wide screens the veil fades out to the right). */
+  .welcome {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    overflow-y: auto;
+    padding: 5rem var(--gutter) var(--space-xl);
+    background: var(--color-scrim);
+    transition: opacity var(--duration-slow) var(--ease-out);
+  }
+
+  @media (min-width: 64em) {
+    .welcome {
+      justify-items: start;
+      padding-left: max(var(--gutter), 6vw);
+      background: linear-gradient(90deg, var(--color-scrim) 30%, transparent 75%);
+    }
+
+    .welcome .card {
+      justify-items: start;
+      text-align: left;
+    }
+
+    .welcome .actions {
+      justify-content: flex-start;
+    }
+  }
+
+  .welcome[data-state='playing'] {
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity var(--duration-slow) var(--ease-out),
+      visibility 0s linear var(--duration-slow);
+  }
+
+  .card {
+    display: grid;
+    gap: var(--space-l);
+    justify-items: center;
+    width: min(100%, 42rem);
+    text-align: center;
+  }
+
+  .loading {
+    display: grid;
+    gap: var(--space-xs);
+    justify-items: center;
+    width: min(100%, 22rem);
+  }
+
+  .bar {
+    width: 100%;
+    height: var(--border-strong);
+    background: var(--color-line);
+  }
+
+  .fill {
+    display: block;
+    height: 100%;
+    background: var(--color-accent);
+    transform: scaleX(var(--progress, 0));
+    transform-origin: left;
+    transition: transform var(--duration-base) var(--ease-out);
+  }
+
+  .loading-text {
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+  }
+
+  .controls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr));
+    gap: var(--space-m) var(--space-l);
+    width: 100%;
+    text-align: left;
+  }
+
+  .controls > div {
+    display: grid;
+    gap: var(--space-2xs);
+  }
+
+  /* Reminder of the keys while playing, bottom-left. */
+  .keys {
+    position: fixed;
+    bottom: var(--space-m);
+    left: 50%;
+    z-index: 2;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-xs) var(--space-l);
+    width: max-content;
+    max-width: calc(100% - 2 * var(--gutter));
+    text-shadow: 0 0 0.6em var(--color-bg);
+    transform: translateX(-50%);
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    pointer-events: none;
+  }
+
+  .keys[hidden],
+  .loading[hidden],
+  .controls[hidden] {
+    display: none;
+  }
+
+  kbd {
+    display: inline-block;
+    min-width: 1.75em;
+    margin-right: var(--space-2xs);
+    padding: 0.1em 0.4em;
+    border: var(--border-thin) solid var(--color-line);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font-family: inherit;
+    text-align: center;
+  }
+
+  @media (hover: none) {
+    .keys {
+      display: none;
+    }
+  }
+
+  /* Darkens the corners of the picture, like a lens. */
+  .vignette {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background: radial-gradient(ellipse at center, transparent 50%, var(--color-scrim) 135%);
+  }
+
+  /* The place name, top centre, fading in and out. */
+  .region {
+    position: fixed;
+    top: 18%;
+    left: 50%;
+    z-index: 2;
+    max-width: none;
+    color: var(--color-text);
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    font-weight: 600;
+    letter-spacing: var(--tracking-display);
+    line-height: var(--leading-display);
+    text-align: center;
+    text-transform: uppercase;
+    text-shadow: 0 0.1em 0.6em var(--color-scrim);
+    white-space: nowrap;
+    opacity: 0;
+    transform: translate(-50%, 0.4rem);
+    transition:
+      opacity 600ms var(--ease-out),
+      transform 900ms var(--ease-out);
+    pointer-events: none;
+  }
+
+  .region::after {
+    content: '';
+    display: block;
+    width: 3rem;
+    height: var(--border-strong);
+    margin: var(--space-s) auto 0;
+    background: var(--color-accent);
+  }
+
+  .region.is-shown {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
+  .look-prompt {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    z-index: 2;
+    padding: var(--space-xs) var(--space-m);
+    background: var(--color-scrim);
+    color: var(--color-text);
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  .look-prompt[hidden] {
+    display: none;
+  }
+
+  /* Talking: the prompt (a button, so touch can tap it) and what was said, bottom centre. */
+  .talk {
+    position: fixed;
+    bottom: calc(var(--space-m) + 3rem);
+    left: 50%;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    min-height: var(--tap-min);
+    padding: var(--space-xs) var(--space-m);
+    border: var(--border-thin) solid var(--color-line);
+    background: var(--color-scrim);
+    color: var(--color-text);
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    transform: translateX(-50%);
+    transition: border-color var(--duration-fast) var(--ease-out);
+  }
+
+  .talk:hover {
+    border-color: var(--color-accent);
+  }
+
+  .talk kbd {
+    margin-right: 0;
+  }
+
+  .talk[hidden],
+  .speech[hidden],
+  .stick-zone[hidden] {
+    display: none;
+  }
+
+  @media (hover: none) {
+    .talk {
+      bottom: auto;
+      top: 58%;
+    }
+
+    .talk kbd {
+      display: none;
+    }
+  }
+
+  .speech {
+    position: fixed;
+    bottom: calc(var(--space-m) + 7rem);
+    left: 50%;
+    z-index: 2;
+    display: grid;
+    gap: var(--space-2xs);
+    width: min(100% - 2 * var(--gutter), 34rem);
+    padding: var(--space-s) var(--space-m);
+    border-left: var(--border-strong) solid var(--color-accent);
+    background: var(--color-scrim);
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .speech:not([hidden]) {
+      animation: speech-in var(--duration-base) var(--ease-out);
+    }
+  }
+
+  @keyframes speech-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  .speech-name {
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+  }
+
+  .speech-line {
+    font-size: var(--text-lg);
+  }
+
+  /* The touch stick: the left half of the screen. Before the thumb lands, a faint ring shows
+     where it is. */
+  .stick-zone {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    z-index: 1;
+    width: 50%;
+    height: 62%;
+    touch-action: none;
+  }
+
+  .stick-base {
+    --x: 5.5rem;
+    --y: calc(100% - 6rem);
+    position: absolute;
+    top: var(--y);
+    left: var(--x);
+    width: 7rem;
+    height: 7rem;
+    margin: -3.5rem 0 0 -3.5rem;
+    border: var(--border-strong) solid var(--color-line);
+    border-radius: 50%;
+    opacity: 0.45;
+    pointer-events: none;
+  }
+
+  .stick-zone.is-active .stick-base {
+    opacity: 1;
+  }
+
+  .stick-knob {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 3rem;
+    height: 3rem;
+    margin: -1.5rem 0 0 -1.5rem;
+    border-radius: 50%;
+    background: var(--color-text-muted);
+  }
+
+  .lead {
+    color: var(--color-text-muted);
+    font-size: var(--text-lg);
+  }
+
+  .notice {
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-s);
+  }
+
+  /* Panels (inside PlayDialog) */
+  :global(.panel) .actions {
+    justify-content: flex-start;
+  }
+
+  .pitch {
+    font-size: var(--text-lg);
+  }
+
+  .email {
+    color: var(--color-text-muted);
+  }
+
+  .media {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border: var(--border-thin) solid var(--color-line);
+  }
+
+  .shots {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 10rem), 1fr));
+    gap: var(--space-xs);
+  }
+
+  .shot {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border: var(--border-thin) solid var(--color-line);
+  }
+
+  /* Quest board */
+  .board-group {
+    display: grid;
+    gap: var(--space-xs);
+  }
+
+  .board-heading {
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    font-weight: 400;
+    letter-spacing: var(--tracking-label);
+  }
+
+  .quest {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-2xs) var(--space-m);
+    width: 100%;
+    min-height: var(--tap-min);
+    padding: var(--space-s) 0;
+    border: 0;
+    border-top: var(--border-thin) solid var(--color-line);
+    background: none;
+    text-align: left;
+    transition: color var(--duration-fast) var(--ease-out);
+  }
+
+  .quest:hover {
+    color: var(--color-accent);
+  }
+
+  .quest-title {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  .quest-note {
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+  }
+
+  /* Where to find it in the village, on its own line. */
+  .quest-where {
+    flex-basis: 100%;
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+  }
+
+  .board-footer {
+    padding-top: var(--space-s);
+    border-top: var(--border-thin) solid var(--color-line);
+  }
+
+  /* Credits */
+  .credits {
+    display: grid;
+    gap: var(--space-m);
+  }
+
+  .credit-name {
+    font-weight: 600;
+  }
+
+  .credit-meta {
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+  }
+</style>

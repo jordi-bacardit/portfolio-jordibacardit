@@ -34,6 +34,7 @@ const [firstName, ...lastName] = site.name.split(' ');
         <div class="actions">
           <Button href="/work" variant="primary">View work</Button>
           <Button href="/contact">Contact me</Button>
+          <Button href="/play">Play in 3D</Button>
         </div>
       </div>
     </div>
@@ -135,19 +136,18 @@ const [firstName, ...lastName] = site.name.split(' ');
     margin-top: var(--space-xs);
   }
 
-  /* The page's one orchestrated moment: the name rises letter by letter (SplitText), then the
-     text fades in. While the intro plays, both wait for its panels to open. */
+  /* The name rises letter by letter (SplitText), then the text fades in. While the gate is up
+     (Intro.astro), both wait, so choosing Read reveals them as they play. They wait only once the
+     gate's script is running (data-gate-ready): if it never loads, the CSS safety net removes the
+     gate and the hero must still appear. */
   @media (prefers-reduced-motion: no-preference) {
     .hero-text {
       animation: fade var(--duration-slow) var(--ease-out) 450ms both;
     }
 
-    :global(html.intro-play) .name {
-      --split-delay: 1450ms;
-    }
-
-    :global(html.intro-play) .hero-text {
-      animation-delay: 1900ms;
+    :global(html.gate-open[data-gate-ready]) .name :global(.char),
+    :global(html.gate-open[data-gate-ready]) .hero-text {
+      animation-play-state: paused;
     }
   }
 

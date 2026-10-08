@@ -6,12 +6,25 @@
 // - [data-scramble]: letters decode on hover/focus;
 // - [data-spotlight]: sets --spot-x/--spot-y so the element can draw a light under the pointer.
 // Movement is skipped with prefers-reduced-motion; pointer effects only run with a mouse.
+// The 3D village (/play) has no cursor ring: it captures the mouse, and the ring would be left
+// floating on screen.
+interface Props {
+  cursor?: boolean;
+}
+
+const { cursor = true } = Astro.props;
 ---
 
 <div class="grain" aria-hidden="true"></div>
-<div class="cursor" aria-hidden="true" data-cursor-ring>
-  <span class="ring"><span class="label" data-cursor-label></span></span>
-</div>
+{
+  cursor && (
+    <div class="cursor" aria-hidden="true" data-cursor-ring>
+      <span class="ring">
+        <span class="label" data-cursor-label></span>
+      </span>
+    </div>
+  )
+}
 
 <script>
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;

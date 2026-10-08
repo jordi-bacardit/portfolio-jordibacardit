@@ -1,0 +1,75 @@
+---
+// A panel over the 3D village (/play): a native modal <dialog>, so focus stays inside it and Esc
+// closes it. Opened by any button with data-open="<id>"; /play's script wires them up.
+import Button from './Button.astro';
+
+interface Props {
+  id: string;
+  title: string;
+}
+
+const { id, title } = Astro.props;
+---
+
+<dialog class="panel" id={id} aria-labelledby={`${id}-title`} data-panel>
+  <div class="head">
+    <h2 id={`${id}-title`}>{title}</h2>
+    <Button data-close>Close<span class="visually-hidden"> {title}</span></Button>
+  </div>
+  <div class="body">
+    <slot />
+  </div>
+</dialog>
+
+<style>
+  /* margin: auto centres the modal (the global reset sets every margin to 0). */
+  .panel {
+    margin: auto;
+    width: min(100% - 2 * var(--gutter), 52rem);
+    max-height: min(100% - 2 * var(--gutter), 52rem);
+    padding: 0;
+    border: var(--border-thin) solid var(--color-line);
+    background: var(--color-surface);
+    color: var(--color-text);
+  }
+
+  .panel::backdrop {
+    background: var(--color-scrim);
+  }
+
+  .head {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-m);
+    padding: var(--space-m) var(--space-l);
+    border-bottom: var(--border-thin) solid var(--color-line);
+    background: var(--color-surface);
+  }
+
+  .head h2 {
+    font-size: var(--text-xl);
+  }
+
+  .body {
+    display: grid;
+    gap: var(--space-l);
+    padding: var(--space-l);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .panel[open] {
+      animation: panel-in var(--duration-slow) var(--ease-out);
+    }
+  }
+
+  @keyframes panel-in {
+    from {
+      opacity: 0;
+      transform: translateY(1rem);
+    }
+  }
+</style>
