@@ -9,23 +9,24 @@ export interface NavItem {
 
 export const site = {
   name: 'Jordi Bacardit',
-  // The focus, not a job title: never "Game Designer" on its own.
-  role: 'Game Design',
+  // The focus, not a job title: never "Producer" or "Game Designer" on its own.
+  role: 'Game Production & Design',
   description:
-    'Portfolio of Jordi Bacardit, a video games engineering student at UVic working towards a career in game design.',
+    'Portfolio of Jordi Bacardit: game production and design, with a background in video games engineering.',
+  // Education, shown as the degree and the university only: never "student", a graduation date
+  // or whether the degree is still in progress (2026-10-13).
   study: {
     degree: 'Multimedia, Applications & Video Games Engineering',
     school: 'Universitat de Vic (UVic)',
     country: 'Spain',
-    graduation: 'Late 2027' as string | null,
   },
   location: 'Barcelona, Spain',
   openToRelocation: true,
   languages: 'Catalan and Spanish (native), English (advanced)',
-  lookingFor: 'Open to game design internships and junior roles in the European games industry',
-  status: 'Open to internships and junior roles',
+  lookingFor: 'Open to game production and design roles in the European games industry',
+  status: 'Open to game production and design roles',
   // The line that opens the Contact page and the village's Contact panel.
-  contactPitch: 'Open to internships, junior roles, networking and collaboration in game design.',
+  contactPitch: 'Open to game production and design roles, networking and collaboration.',
   email: 'jordibacardit12@gmail.com' as string | null,
   linkedin: 'https://www.linkedin.com/in/jordi-bacardit/' as string | null,
   github: 'https://github.com/jordi-bacardit' as string | null,

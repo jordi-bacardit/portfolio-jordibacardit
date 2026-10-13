@@ -11,22 +11,21 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 const { study } = site;
 
 const facts = [
-  { label: 'Studying', value: study.degree },
+  { label: 'Education', value: study.degree },
   { label: 'University', value: `${study.school}, ${study.country}` },
-  ...(study.graduation ? [{ label: 'Graduating', value: study.graduation }] : []),
   {
     label: 'Based in',
     value: `${site.location}${site.openToRelocation ? ', open to relocation' : ''}`,
   },
   { label: 'Languages', value: site.languages },
-  { label: 'Focus', value: 'Game design, backed by production and technical skills' },
-  { label: 'Open to', value: 'Game design internships and junior roles' },
+  { label: 'Focus', value: 'Game production and design, backed by technical skills' },
+  { label: 'Open to', value: 'Game production and design roles' },
 ];
 ---
 
 <BaseLayout
   title="About"
-  description={`About ${site.name}: ${study.degree} student at ${study.school}, working towards a career in game design.`}
+  description={`About ${site.name}: game production and design, with a background in ${study.degree} at ${study.school}.`}
 >
   <section class="hero" aria-labelledby="about-title">
     <div class="photo">
@@ -43,8 +42,8 @@ const facts = [
     <div class="hero-text">
       <h1 id="about-title"><SplitText text="Who I am." /></h1>
       <p class="lead">
-        I'm {site.name}, a {study.degree} student at {study.school}, {study.country}, working
-        towards a career in game design.
+        I'm {site.name}. My background is in {study.degree} at {study.school}, {study.country}, and
+        I plan and design small games end to end, from the first idea to playtesting and release.
       </p>
     </div>
   </section>
@@ -63,16 +62,16 @@ const facts = [
   </Container>
 
   <Container as="section" class="focus" aria-labelledby="focus-title">
-    <h2 id="focus-title" class="statement">Game design, backed by production and technical skills.</h2>
+    <h2 id="focus-title" class="statement">Game production and design, backed by technical skills.</h2>
     <div class="text">
       <p>
-        My goal is to work as a game designer. I like thinking about how a game should feel to play,
-        and then turning that into rules, systems and levels that can be built, tested and improved.
+        I've planned and coordinated small projects: setting the scope, organising tasks in Trello,
+        keeping the team in sync, running playtests with friends and deciding what to cut to finish
+        on time.
       </p>
       <p>
-        I've also planned and coordinated small projects: setting the scope, organising tasks in
-        Trello, keeping the team in sync, running playtests with friends and deciding what to cut to
-        finish on time.
+        On the design side, I like thinking about how a game should feel to play, and then turning
+        that into rules, systems and levels that can be built, tested and improved.
       </p>
       <p>
         I've built projects in Unity and Unreal Engine myself, so I understand how the things I

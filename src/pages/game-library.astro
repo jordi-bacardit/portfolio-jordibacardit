@@ -123,8 +123,9 @@ const countLabel = (count: number) => `${count} ${count === 1 ? 'game' : 'games'
   const status = document.querySelector<HTMLElement>('[data-search-status]');
   const empty = document.querySelector<HTMLElement>('[data-search-empty]');
   const cards = [...document.querySelectorAll<HTMLElement>('[data-game-title]')];
+  // Accents and curly apostrophes don't matter: "assassin's" finds "Assassin’s Creed III".
   const normalize = (text: string) =>
-    text.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+    text.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[‘’]/g, "'").toLowerCase();
   const countLabel = (count: number) => `${count} ${count === 1 ? 'game' : 'games'}`;
 
   if (search && input && status) {

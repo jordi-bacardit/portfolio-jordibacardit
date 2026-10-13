@@ -1,11 +1,13 @@
 ---
 # Same template for every project. Empty fields are hidden on the site: fill one in and it appears.
-# Not built yet: always Planned / In development / TFG. No screenshots, videos, features or results
+# Not built yet: always Planned / In development. No screenshots, videos, features or results
 # until they exist. Sources: Jordi's brief of 2026-10-02 (concept, challenges, roadmap).
-# TODO(content): final title, engine and AI technology once chosen.
+# It's Jordi's Final Degree Project (TFG), but the site never says so: no "TFG", "Final Degree
+# Project" or UVic here (2026-10-13). The title is a descriptive working title.
+# TODO(content): final title (the file name is the URL: rename it too), engine and AI technology once chosen.
 
 # Basics
-title: Final Degree Project
+title: AI-Driven NPC RPG
 summary: A small RPG where you talk to AI-driven NPCs by typing, with no pre-written lines.
 status: planned # prototype | in-development | complete | released | archived | planned
 year: # e.g. 2027
@@ -17,7 +19,7 @@ role: # e.g. Game Designer, Solo developer
 team: # size and disciplines; empty for a solo project
 duration:
 engine:
-type: tfg # course | personal | jam | tfg
+type: # course | personal | jam | tfg (left empty: the site doesn't say it's a TFG)
 dates: January – June 2027 # shown as Timeline, only when there's no year
 
 # Home and Work cards: shorter text and role (the page's are used when empty)
@@ -26,7 +28,7 @@ card:
   role:
 
 # Media
-cover: # /src/assets/projects/final-degree-project/cover.jpg
+cover: # /src/assets/projects/ai-npc-rpg/cover.jpg
 coverAlt: # what the cover shows (required with a cover)
 trailer: # YouTube link: shown big right under the title
 trailerPoster: # image on the trailer's Play button (uses the cover if empty)
@@ -38,9 +40,8 @@ gallery: # screenshots or GIFs
 sections:
   - title: Overview
     text: >-
-      My Final Degree Project at UVic will be a small RPG built around AI-driven NPCs. Instead of
-      picking from pre-written dialogue options, the player talks to characters by typing whatever
-      they want, and the NPCs answer in character.
+      A small RPG built around AI-driven NPCs. Instead of picking from pre-written dialogue options,
+      the player talks to characters by typing whatever they want, and the NPCs answer in character.
 
   - title: Design challenges I want to explore
     lists:
